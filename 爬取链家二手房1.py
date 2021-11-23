@@ -2,7 +2,7 @@
 # author:           inspurer(月小水长)
 # pc_type           lenovo
 # create_date:      2019/2/27
-# file_name:        lianjia_crawler.py
+# file_name:        爬取链家二手房1.py
 # github            https://github.com/inspurer
 # qq_mail           2391527690@qq.com
 
@@ -159,7 +159,7 @@ def save_data(data, filename):
 
 def main():
     # cq,cs,nj,dl,wh,cc
-    city_list = ['nj']
+    city_list = ['bj']
     for city in city_list:
         page_url_list = get_list_page_url(city)
 

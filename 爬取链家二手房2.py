@@ -14,7 +14,7 @@ matplotlib.rcParams['font.sans-serif'] = ['SimHei']
 matplotlib.rcParams['axes.unicode_minus'] = False
 def load_data():
     global data,dic_data
-    with open("xm.json","r",encoding="utf-8") as f:
+    with open("bj.json","r",encoding="utf-8") as f:
         str = f.read()
         data = json.loads(str)
     dic_data = dict()
