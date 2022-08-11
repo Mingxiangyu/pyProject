@@ -4,8 +4,8 @@
 '''@author = 'Appleyk'  '''
 '''@time   = '2017年9月23日11:42:32' '''
 
-from urllib import request
 import re  # 使用正则表达式
+from urllib import request
 
 
 def getResponse(url):

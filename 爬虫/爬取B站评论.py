@@ -1,7 +1,8 @@
+import re
+import time
+
 import requests
 import urllib3
-import time
-import re
 
 urllib3.disable_warnings()
 
