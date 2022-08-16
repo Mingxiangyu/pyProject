@@ -6,17 +6,13 @@
 # github            https://github.com/inspurer
 # qq_mail           2391527690@qq.com
 
-import requests
-
+import json
+import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 
+import requests
 from pyquery import PyQuery as pq
-
-import json
-
-import threading
-
-import time
 
 
 def get_list_page_url(city):

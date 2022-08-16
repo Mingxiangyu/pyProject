@@ -7,8 +7,10 @@
 # qq_mail           2391527690@qq.com
 
 import json
-import matplotlib.pyplot as plt
+
 import matplotlib
+import matplotlib.pyplot as plt
+
 # 设置中文字体和负号正常显示
 matplotlib.rcParams['font.sans-serif'] = ['SimHei']
 matplotlib.rcParams['axes.unicode_minus'] = False

@@ -1,8 +1,9 @@
+import csv
+import random
+import time
+
 from selenium import webdriver  # 浏览器驱动
 from selenium.webdriver.common.keys import Keys  # 模拟浏览器点击时需要用
-
-import time,csv
-import random 
 
 fieldnames = ['基金名称','日期', '单位净值', '累计净值', '日涨幅'] # 待获取的目标字段
 
