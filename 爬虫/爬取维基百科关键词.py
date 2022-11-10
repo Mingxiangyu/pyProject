@@ -1,5 +1,4 @@
 import csv
-import json
 import logging
 import re
 import urllib
@@ -54,7 +53,7 @@ class Clearoutside(object):
         # }
         # resp = requests.get(url, timeout=8, proxies=proxies, headers=self.headers, allow_redirects=True)
         # content = resp.content
-        response = requests.get(url, headers=self.headers)
+        response = requests.get(url, headers=self.headers, timeout=30)
         content = response.content
         # 获取响应字符串编码
         encoding = response.apparent_encoding
@@ -78,10 +77,10 @@ class Clearoutside(object):
         html = self.get_html(url)
         # TODO 进行数据抽取
         baike_data = self.parse_html(html, "https://zh.wikipedia.org/wiki/")
-        json_baike = json.dumps(baike_data)
-        print(json_baike)
-        return json_baike
-        # return baike_data
+        # json_baike = json.dumps(baike_data)
+        # print(json_baike)
+        # return json_baike
+        return baike_data
 
     def _list_parse(self, base_url):
         node = etree.HTML(self)
@@ -175,6 +174,12 @@ def spider(keyword):
     return json_baike
 
 
+@app.route("/")
+def hello():
+    return " hello word"
+
+
 if __name__ == '__main__':
     # 启动flask，提供http接口
-    app.run(port=int("8000"))
+    # 如果是docker部署，需要注意ip指定为0.0.0.0，flask默认ip为127.0.0.1，docker启动时，无法在宿主机访问！！
+    app.run(http="0.0.0.0", port=int("8000"))
