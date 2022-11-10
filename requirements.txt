@@ -7,7 +7,7 @@ cryptography==1.8.1
 ffmpeg-python==0.2.0
 future==0.18.2
 idna @ file:///home/conda/feedstock_root/build_artifacts/idna_1642433548627/work
-numpy==1.19.5
+numpy~=1.16.4
 packaging @ file:///home/conda/feedstock_root/build_artifacts/packaging_1637239678211/work
 pandas==1.1.5
 pyahocorasick==1.4.4
@@ -28,3 +28,5 @@ selenium~=3.141.0
 requests~=2.27.1
 urllib3~=1.26.10
 lxml~=4.9.1
+flask~=2.0.3
+scipy~=1.5.4
