@@ -182,4 +182,4 @@ def hello():
 if __name__ == '__main__':
     # 启动flask，提供http接口
     # 如果是docker部署，需要注意ip指定为0.0.0.0，flask默认ip为127.0.0.1，docker启动时，无法在宿主机访问！！
-    app.run(http="0.0.0.0", port=int("8000"))
+    app.run(host="0.0.0.0", port=int("8000"))
