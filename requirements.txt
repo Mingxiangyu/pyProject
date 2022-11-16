@@ -1,32 +1,11 @@
-asn1crypto @ file:///home/conda/feedstock_root/build_artifacts/asn1crypto_1647369152656/work
-brotlipy==0.7.0
-certifi==2016.2.28
-cffi==1.10.0
-cpca==0.5.5
-cryptography==1.8.1
-ffmpeg-python==0.2.0
-future==0.18.2
-idna @ file:///home/conda/feedstock_root/build_artifacts/idna_1642433548627/work
-numpy~=1.16.4
-packaging @ file:///home/conda/feedstock_root/build_artifacts/packaging_1637239678211/work
-pandas==1.1.5
-pyahocorasick==1.4.4
-pycparser @ file:///home/conda/feedstock_root/build_artifacts/pycparser_1636257122734/work
-pyOpenSSL==17.0.0
-pyparsing @ file:///home/conda/feedstock_root/build_artifacts/pyparsing_1652235407899/work
-PySocks @ file:///D:/bld/pysocks_1610291695773/work
-python-dateutil==2.8.2
-pytz==2022.1
-selenium @ file:///D:/bld/selenium_1610664668562/work
-sinan==0.1.5
-six @ file:///home/conda/feedstock_root/build_artifacts/six_1620240208055/work
-urllib3 @ file:///home/conda/feedstock_root/build_artifacts/urllib3_1657224465922/work
-win-inet-pton @ file:///D:/bld/win_inet_pton_1610147511403/work
-wincertstore==0.2
+numpy
+python-dateutil
 
-selenium~=3.141.0
-requests~=2.27.1
-urllib3~=1.26.10
-lxml~=4.9.1
-flask~=2.0.3
-scipy~=1.5.4
+requests
+urllib3
+lxml
+flask
+scipy
+cchardet
+beautifulsoup4
+colorama
