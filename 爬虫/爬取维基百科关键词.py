@@ -430,7 +430,6 @@ def extract(html,
 
 
 def parse_html(html, host):
-    total_result = {}
     content_result = {}
 
     doc = Document(html)
@@ -472,12 +471,11 @@ def parse_html(html, host):
         except Exception as e:
             logging.exception(e)
 
-    total_result["content"] = content_result
 
     # list_result = _list_parse(html, host)
     # total_result["list"] = list_result
 
-    return total_result
+    return content_result
 
 
 class Clearoutside(object):
