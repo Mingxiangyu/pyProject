@@ -5,7 +5,7 @@
 # @Descriptioon :
 # 原文链接：https://blog.csdn.net/qazwsxpy/article/details/127427409
 # 原文链接：https://www.heywhale.com/mw/project/62dbd68d3915ed2e06bdcd50
-# @File :  使用Python下载NOAA气象数据.py
+# @File :  下载NOAA气象数据.py
 import os
 from ftplib import FTP
 

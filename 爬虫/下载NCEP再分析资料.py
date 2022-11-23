@@ -6,7 +6,11 @@
 # 原文链接：https://blog.csdn.net/qazwsxpy/article/details/127427409
 # 原文链接：https://www.heywhale.com/mw/project/5f3e0b4cce44c0002c8e0073
 # @File :  下载NCEP再分析资料.py
-
+"""
+NCEP的FNL资料：http://rda.ucar.edu/data/ds083.2
+空间分辨率：1°×1°
+时间分辨率：逐6小时
+"""
 import datetime
 
 import requests
@@ -25,7 +29,9 @@ def builtSession():
 
 # 定义下载函数
 def download(sess, dt):
+    # grib1格式文件启用时间
     g1 = datetime.datetime(1999, 7, 30, 18)
+    # grib2格式文件启用时间
     g2 = datetime.datetime(2007, 12, 6, 12)
     if dt >= g2:
         suffix = "grib2"
@@ -37,6 +43,7 @@ def download(sess, dt):
     url = "http://rda.ucar.edu/data/ds083.2"
     folder = "{}/{}/{}.{:0>2d}".format(suffix, dt.year, dt.year, dt.month)
     filename = "fnl_{}.{}".format(dt.strftime('%Y%m%d_%H_00'), suffix)
+    # 构建文件路径
     fullurl = "/".join([url, folder, filename])
     r = sess.get(fullurl)
     with open(filename, "wb") as fw:

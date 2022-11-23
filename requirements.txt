@@ -9,3 +9,8 @@ scipy
 cchardet
 beautifulsoup4
 colorama
+pandas
+matplotlib
+xlwt
+siphon
+pillow
