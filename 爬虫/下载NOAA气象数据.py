@@ -3,8 +3,8 @@
 # @Author :xming
 # @Version :1.0
 # @Descriptioon :
-# 原文链接：https://blog.csdn.net/qazwsxpy/article/details/127427409
-# 原文链接：https://www.heywhale.com/mw/project/62dbd68d3915ed2e06bdcd50
+# @link：https://blog.csdn.net/qazwsxpy/article/details/127427409
+# @link：https://www.heywhale.com/mw/project/62dbd68d3915ed2e06bdcd50
 # @File :  下载NOAA气象数据.py
 import os
 from ftplib import FTP
@@ -55,6 +55,8 @@ chance = input("Y or N")
 """
 if chance.upper() == 'Y':
     # 9.Download all the needfiles
+    if not os.path.exists(destdir):
+        os.makedirs(destdir)
     os.chdir(destdir)
 
     for file in needfiles:

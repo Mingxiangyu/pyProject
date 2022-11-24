@@ -3,7 +3,7 @@
 # @Author :xming
 # @Version :1.0
 # @Descriptioon :
-# 原文链接：https://blog.csdn.net/weixin_42590927/article/details/123312335
+# @link：https://blog.csdn.net/weixin_42590927/article/details/123312335
 # @File :  下载所有亚洲地区树轮观测数据.py
 
 

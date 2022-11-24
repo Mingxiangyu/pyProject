@@ -3,7 +3,7 @@
 # @Author :xming
 # @Version :1.0
 # @Descriptioon :
-# 原文链接：https://www.heywhale.com/api/notebooks/62ea6d2ef145d47a93d25a5a/RenderedContent?cellcomment=1&cellbookmark=1#2.2-NCEP-DOE-Reanalysis-2-%E5%86%8D%E5%88%86%E6%9E%90%E6%95%B0%E6%8D%AE-by-Guo
+# @link：https://www.heywhale.com/api/notebooks/62ea6d2ef145d47a93d25a5a/RenderedContent?cellcomment=1&cellbookmark=1#2.2-NCEP-DOE-Reanalysis-2-%E5%86%8D%E5%88%86%E6%9E%90%E6%95%B0%E6%8D%AE-by-Guo
 # @File :  下载NCEP-DOEReanalysis2再分析数据.py
 """
 数据下载：https://psl.noaa.gov/data/gridded/data.ncep.reanalysis2.html

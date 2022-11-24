@@ -5,6 +5,7 @@
 # @Descriptioon :
 # @File :  下载modis数据.py
 import datetime
+import hashlib
 import json
 import os
 import os.path
@@ -20,6 +21,12 @@ Token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJBUFMgT0F1dGgyIEF1dGhlbn
 
 
 def date_build(begin, end):
+    """
+    构建起始时间范围列表（如果起止间隔过大，则直接拼接）
+    :param begin:
+    :param end:
+    :return:
+    """
     dates = []
     dt = datetime.datetime.strptime(begin, '%Y-%m-%d')
     dt_end = datetime.datetime.strptime(end, '%Y-%m-%d')
@@ -46,6 +53,19 @@ def date_build(begin, end):
     return time_st
 
 
+def get_file_md5_top10m(file_name):
+    """
+    根据前10兆计算文件的md5
+    :param file_name:
+    :return:
+    """
+    m = hashlib.md5()  # 创建md5对象
+    with open(file_name, 'rb') as fobj:
+        data = fobj.read(10240)
+        m.update(data)  # 更新md5对象
+    return m.hexdigest()  # 返回md5对象
+
+
 class modisDownload(object):
     def __init__(self):
         # 网页版查询请求链接
@@ -53,12 +73,12 @@ class modisDownload(object):
         # 下载请求链接
         # https://ladsweb.modaps.eosdis.nasa.gov/api/v1/files/product=MOD09&collection=6&dateRanges=2022-09-29..2022-09-29,2022-09-30..2022-09-30&areaOfInterest=x1y4,x2y3&dayCoverage=true&dnboundCoverage=true
         """
-                参数1：时间起始范围 {2013-01-02..2013-01-02}
-                参数2：经纬度范围 {90.8,61.9,119.7,51.1}  W: 90.8°, N: 61.9°, E: 119.7°, S: 51.1°
-                """
+        参数1：时间起始范围 {2013-01-02..2013-01-02}
+        参数2：经纬度范围 {90.8,61.9,119.7,51.1}  W: 90.8°, N: 61.9°, E: 119.7°, S: 51.1°
+        """
         self.url = "https://ladsweb.modaps.eosdis.nasa.gov/api/v1/files/product=MOD09&collection=6&dateRanges={}&areaOfInterest=x{}y{},x{}y{}&dayCoverage=true&dnboundCoverage=true"
         ua = UserAgent(verify_ssl=False)
-        for i in range(1, 100):
+        for i in range(1, 30):
             # 产生随机的User - Agent请求头进行访问
             self.headers = {
                 'User-Agent': ua.random
@@ -76,22 +96,32 @@ class modisDownload(object):
         url = self.url.format(time_st, lon_start, lon_end, lan_start, lan_end)
         print("start download html:{}".format(url))
         html = self.get_html(url)
-        print(html)
+        # print(html)
 
         data_dict_array = json.loads(html)
-        print(type(data_dict_array))
 
         for data_dict in data_dict_array:
             data = data_dict_array[data_dict]
 
             file_url_ = data["fileURL"]
+            all_file_url_ = DataURL + file_url_
+            # print(file_url)
+
+            # 文件下载
+            _main(SaveDir, all_file_url_, Token)
+
+            # todo 添加数据来源、文件指纹
+            split_ = all_file_url_.split('/')[-1]
+            path = os.path.join(SaveDir, split_)
+            file_md5 = get_file_md5_top10m(path)
+            print("数据md5为：" + file_md5)
+            data["id"] = file_md5
+
             data_json = json.dumps(data)
-            with open(SaveDir + "/" + data_dict + ".modisjson", "wb") as f:
+            with open(SaveDir + "/" + file_md5 + ".modisjson", "wb") as f:
                 # 写文件用bytes而不是str，所以要转码
                 f.write(bytes(data_json, "utf-8"))
-                all_file_url_ = DataURL + file_url_
-                _main(SaveDir, all_file_url_, Token)
-            # print(file_url)
+
         # todo 获取下载链接列表，并将该列表数据存储为对应元数据文件
         # 基于下载链接，调用token进行文件下载
 
@@ -164,46 +194,16 @@ def sync(src, dest, tok):
             with open(path, 'w+b') as fh:
                 geturl(src, tok, fh)
         else:
-            print('skipping: ', path)
+            # 如果存在，但是字节数为空，则重新下载 todo 如果字节数对应不上网站对数据的描述，是不是也可以重新下载
+            if not os.path.getsize(path):
+                print('downloading: ', path)
+                with open(path, 'w+b') as fh:
+                    geturl(src, tok, fh)
+            else:
+                print('skipping: ', path)
     except IOError as e:
         print("open `%s': %s" % (e.filename, e.strerror), file=sys.stderr)
         sys.exit(-1)
-    # """synchronize src url with dest directory"""
-    # try:
-    #     import csv
-    #     files = [f for f in csv.DictReader(StringIO(geturl('%s.csv' % src, tok)), skipinitialspace=True)]
-    # except ImportError:
-    #     import json
-    #     files = json.loads(geturl(src + '.json', tok))
-    #
-    # # 使用 os.path 因为 python 23 都支持它，而 pathlib 是 3.4+
-    # for f in files:
-    #     # 目前我们使用0文件大小的文件来表示目录
-    #     filesize = int(f['size'])
-    #     path = os.path.join(dest, f['name'])
-    #     url = src + '/' + f['name']
-    #     # 这一步判断当前的是文件夹还是文件
-    #     if filesize == 0:
-    #         try:
-    #             print('creating dir:', path)
-    #             os.mkdir(path)
-    #             sync(src + '/' + f['name'], path, tok)
-    #         except IOError as e:
-    #             print("mkdir `%s': %s" % (e.filename, e.strerror), file=sys.stderr)
-    #             sys.exit(-1)
-    #     else:
-    #         try:
-    #             # 这一步判断本地是否存在该文件，如果不存在就下载，存在的话就跳过
-    #             if not os.path.exists(path):
-    #                 print('downloading: ', path)
-    #                 with open(path, 'w+b') as fh:
-    #                     geturl(url, tok, fh)
-    #             else:
-    #                 print('skipping: ', path)
-    #         except IOError as e:
-    #             print("open `%s': %s" % (e.filename, e.strerror), file=sys.stderr)
-    #             sys.exit(-1)
-    # return 0
 
 
 def _main(SaveDir, URL, Token):

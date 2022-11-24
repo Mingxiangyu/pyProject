@@ -3,7 +3,7 @@
 # @Author :xming
 # @Version :1.0
 # @Descriptioon :
-# 原文链接：https://blog.csdn.net/qq_62257457/article/details/126864449
+# @link：https://blog.csdn.net/qq_62257457/article/details/126864449
 # @File :  下载NASAmodis数据.py
 import re
 

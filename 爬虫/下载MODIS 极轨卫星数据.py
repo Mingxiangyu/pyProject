@@ -3,8 +3,8 @@
 # @Author :xming
 # @Version :1.0
 # @Descriptioon :
-# 原文链接：https://blog.csdn.net/qazwsxpy/article/details/127427409
-# 原文链接：https://www.heywhale.com/api/notebooks/62ea6d2ef145d47a93d25a5a/RenderedContent?cellcomment=1&cellbookmark=1#1.5-%E5%85%A8%E5%9B%BD%E7%A9%BA%E6%B0%94%E8%B4%A8%E9%87%8F%E8%A7%82%E6%B5%8B%E6%95%B0%E6%8D%AE-by-%E2%9C%98%E3%80%81%E5%93%88%E5%93%88%E3%80%81%E6%B4%8B%E6%B5%81
+# @link：https://blog.csdn.net/qazwsxpy/article/details/127427409
+# @link：https://www.heywhale.com/api/notebooks/62ea6d2ef145d47a93d25a5a/RenderedContent?cellcomment=1&cellbookmark=1#1.5-%E5%85%A8%E5%9B%BD%E7%A9%BA%E6%B0%94%E8%B4%A8%E9%87%8F%E8%A7%82%E6%B5%8B%E6%95%B0%E6%8D%AE-by-%E2%9C%98%E3%80%81%E5%93%88%E5%93%88%E3%80%81%E6%B4%8B%E6%B5%81
 # @File :  下载MODIS 极轨卫星数据.py
 
 from __future__ import (division, print_function, absolute_import, unicode_literals)

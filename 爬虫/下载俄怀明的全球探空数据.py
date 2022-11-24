@@ -3,14 +3,14 @@
 # @Author :xming
 # @Version :1.0
 # @Descriptioon :
-# 原文链接：https://blog.csdn.net/qazwsxpy/article/details/127427409
-# 原文链接：https://blog.csdn.net/lilizhekou/article/details/123766062
+# @link：https://blog.csdn.net/qazwsxpy/article/details/127427409
+# @link：https://blog.csdn.net/lilizhekou/article/details/123766062
 # @File :  下载俄怀明的全球探空数据.py
 
 import datetime
 import os
 
-from siphon.simplewebservice.wyoming import WyomingUpperAir
+from siphon.simplewebservice.wyoming import WyomingUpperAir  # 来自怀俄明大学的探空数据
 
 
 # 新建文件夹函数，便于分站点存储数据

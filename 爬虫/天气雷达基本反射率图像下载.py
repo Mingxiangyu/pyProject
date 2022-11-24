@@ -3,8 +3,8 @@
 # @Author :xming
 # @Version :1.0
 # @Descriptioon :
-# 原文链接：https://blog.csdn.net/qazwsxpy/article/details/127427409
-# 原文链接：https://www.heywhale.com/mw/project/61ae12a83c18f70018b5947a
+# @link：https://blog.csdn.net/qazwsxpy/article/details/127427409
+# @link：https://www.heywhale.com/mw/project/61ae12a83c18f70018b5947a
 # @File :  天气雷达基本反射率图像下载.py
 import os
 import urllib.request

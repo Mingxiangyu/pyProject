@@ -37,4 +37,4 @@ date_range = pandas.date_range('20200101', '20201210')
 print(type(date_range))
 print(date_range)
 
-# 原文链接：https://blog.csdn.net/weixin_42327752/article/details/121654538
+# @link：https://blog.csdn.net/weixin_42327752/article/details/121654538

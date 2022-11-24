@@ -3,7 +3,7 @@
 # @Author :xming
 # @Version :1.0
 # @Descriptioon :
-# 原文链接：https://blog.csdn.net/qazwsxpy/article/details/127427409
+# @link：https://blog.csdn.net/qazwsxpy/article/details/127427409
 # @File :  县级市数据获取与处理.py
 import json
 import re

@@ -3,8 +3,8 @@
 # @Author :xming
 # @Version :1.0
 # @Descriptioon :
-# 原文链接：https://blog.csdn.net/qazwsxpy/article/details/127427409
-# 原文链接：https://www.heywhale.com/mw/project/5f79e83afab2e80030065a64/content
+# @link：https://blog.csdn.net/qazwsxpy/article/details/127427409
+# @link：https://www.heywhale.com/mw/project/5f79e83afab2e80030065a64/content
 # @File :  下载台风数据.py
 import json
 

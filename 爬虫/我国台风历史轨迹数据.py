@@ -3,8 +3,8 @@
 # @Author :xming
 # @Version :1.0
 # @Descriptioon :
-# 原文链接：https://blog.csdn.net/qazwsxpy/article/details/127427409
-# 原文链接：https://www.heywhale.com/api/notebooks/62ea6d2ef145d47a93d25a5a/RenderedContent?cellcomment=1
+# @link：https://blog.csdn.net/qazwsxpy/article/details/127427409
+# @link：https://www.heywhale.com/api/notebooks/62ea6d2ef145d47a93d25a5a/RenderedContent?cellcomment=1
 # @File :  我国台风历史轨迹数据.py
 
 import datetime

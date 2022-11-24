@@ -3,9 +3,9 @@
 # @Author :xming
 # @Version :1.0
 # @Descriptioon :
-# 原文链接：https://blog.csdn.net/qazwsxpy/article/details/127427409
-# 原文链接：https://www.heywhale.com/mw/project/5f3e0b4cce44c0002c8e0073
-# @File :  下载NCEP再分析资料.py
+# @link：https://blog.csdn.net/qazwsxpy/article/details/127427409
+# @link：https://www.heywhale.com/mw/project/5f3e0b4cce44c0002c8e0073
+# @File :  下载NCAR再分析资料.py
 """
 NCEP的FNL资料：http://rda.ucar.edu/data/ds083.2
 空间分辨率：1°×1°
