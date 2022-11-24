@@ -40,10 +40,12 @@ def geturl(url, token=None, out=None):
     try:
         import ssl
         CTX = ssl.SSLContext(ssl.PROTOCOL_TLSv1_2)
+        # 如果是python2走这个，否则走下面
         if sys.version_info.major == 2:
             import urllib2
             try:
                 fh = urllib2.urlopen(urllib2.Request(url, headers=headers), context=CTX)
+                # 保存路径，如果有存储路径则进行文件拷贝（即下载）
                 if out is None:
                     return fh.read()
                 else:
@@ -59,6 +61,7 @@ def geturl(url, token=None, out=None):
             from urllib.request import urlopen, Request, URLError, HTTPError
             try:
                 fh = urlopen(Request(url, headers=headers), context=CTX)
+                # 保存路径，如果有存储路径则进行文件拷贝（即下载）
                 if out is None:
                     return fh.read().decode('utf-8')
                 else:
@@ -95,7 +98,7 @@ DESC = "如果文件不存在，此脚本将递归地从 LADS URL 下载所有�
 
 
 def sync(src, dest, tok):
-    """synchronize src url with dest directory"""
+    """将 src url 与 dest 目录同步"""
     try:
         import csv
         files = [f for f in csv.DictReader(StringIO(geturl('%s.csv' % src, tok)), skipinitialspace=True)]
@@ -150,9 +153,12 @@ def _main(SaveDir, URL, Token):
 
 
 if __name__ == '__main__':
-    SaveDir = input("请输入数据保存地址")
-    DataURL = input("请输入数据所在链接")
-    Token = input("请输入Keys")
+    SaveDir = "D:\RS_data"
+    DataURL = "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/6/MOD09/2022/266/MOD09.A2022266.1000.006.2022268023535.hdf"
+    Token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJBUFMgT0F1dGgyIEF1dGhlbnRpY2F0b3IiLCJpYXQiOjE2Njg3NTIzNDAsIm5iZiI6MTY2ODc1MjM0MCwiZXhwIjoxNjg0MzA0MzQwLCJ1aWQiOiJkZGxlYXJuaW5nIiwiZW1haWxfYWRkcmVzcyI6Im14aWFuZ195dUAxNjMuY29tIiwidG9rZW5DcmVhdG9yIjoiZGRsZWFybmluZyJ9.LFuRdRWnkpR2VGk6GzIN_bl2h6AZdtUNiJh1e6vuMn8"
+    # SaveDir = input("请输入数据保存地址")
+    # DataURL = input("请输入数据所在链接")
+    # Token = input("请输入Keys")
     try:
         sys.exit(_main(SaveDir, DataURL, Token))
     except KeyboardInterrupt:
