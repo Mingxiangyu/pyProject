@@ -14,3 +14,5 @@ matplotlib
 xlwt
 siphon
 pillow
+pyftpdlib
+pip

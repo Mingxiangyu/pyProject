@@ -72,11 +72,13 @@ class modisDownload(object):
         # https://ladsweb.modaps.eosdis.nasa.gov/search/order/4/MOD09--6/2013-01-02..2013-01-02,2013-01-14..2013-01-14/DB/12.5,6.7,41.6,-7
         # 下载请求链接
         # https://ladsweb.modaps.eosdis.nasa.gov/api/v1/files/product=MOD09&collection=6&dateRanges=2022-09-29..2022-09-29,2022-09-30..2022-09-30&areaOfInterest=x1y4,x2y3&dayCoverage=true&dnboundCoverage=true
+        # https://ladsweb.modaps.eosdis.nasa.gov/api/v1/files/product=CLDPROP_D3_MODIS_Aqua&collection=5111&dateRanges=2013-01-02..2013-01-02&areaOfInterest=x-190y90,x180y10&dayCoverage=true&dnboundCoverage=true
+        # https://ladsweb.modaps.eosdis.nasa.gov/api/v1/files/product=CLDPROP_D3_MODIS_Aqua&collection=5111&dateRanges=2022-9-23..2022-10-30&areaOfInterest=x1y2,x3y4&dayCoverage=true&dnboundCoverage=true
         """
         参数1：时间起始范围 {2013-01-02..2013-01-02}
         参数2：经纬度范围 {90.8,61.9,119.7,51.1}  W: 90.8°, N: 61.9°, E: 119.7°, S: 51.1°
         """
-        self.url = "https://ladsweb.modaps.eosdis.nasa.gov/api/v1/files/product=MOD09&collection=6&dateRanges={}&areaOfInterest=x{}y{},x{}y{}&dayCoverage=true&dnboundCoverage=true"
+        self.url = "https://ladsweb.modaps.eosdis.nasa.gov/api/v1/files/product={}&collection=5111&dateRanges={}&areaOfInterest=x{}y{},x{}y{}&dayCoverage=true&dnboundCoverage=true"
         ua = UserAgent(verify_ssl=False)
         for i in range(1, 30):
             # 产生随机的User - Agent请求头进行访问
@@ -91,39 +93,40 @@ class modisDownload(object):
         html = response.text
         return html
 
-    def main(self, start_time, end_time, lon_start, lon_end, lan_start, lan_end):
+    def main(self, product, start_time, end_time, lon_start, lon_end, lan_start, lan_end):
         time_st = date_build(start_time, end_time)
-        url = self.url.format(time_st, lon_start, lon_end, lan_start, lan_end)
+        url = self.url.format(product, time_st, lon_start, lon_end, lan_start, lan_end)
         print("start download html:{}".format(url))
         html = self.get_html(url)
         # print(html)
 
-        data_dict_array = json.loads(html)
+        try:
+            data_dict_array = json.loads(html)
 
-        for data_dict in data_dict_array:
-            data = data_dict_array[data_dict]
+            for data_dict in data_dict_array:
+                data = data_dict_array[data_dict]
 
-            file_url_ = data["fileURL"]
-            all_file_url_ = DataURL + file_url_
-            # print(file_url)
+                file_url_ = data["fileURL"]
+                all_file_url_ = DataURL + file_url_
+                # print(file_url)
 
-            # 文件下载
-            _main(SaveDir, all_file_url_, Token)
+                # 文件下载
+                _main(SaveDir, all_file_url_, Token)
 
-            # todo 添加数据来源、文件指纹
-            split_ = all_file_url_.split('/')[-1]
-            path = os.path.join(SaveDir, split_)
-            file_md5 = get_file_md5_top10m(path)
-            print("数据md5为：" + file_md5)
-            data["id"] = file_md5
+                # todo 添加数据来源
+                split_ = all_file_url_.split('/')[-1]
+                path = os.path.join(SaveDir, split_)
+                file_md5 = get_file_md5_top10m(path)
+                print("数据md5为：" + file_md5)
+                data["id"] = file_md5
 
-            data_json = json.dumps(data)
-            with open(SaveDir + "/" + file_md5 + ".modisjson", "wb") as f:
-                # 写文件用bytes而不是str，所以要转码
-                f.write(bytes(data_json, "utf-8"))
-
-        # todo 获取下载链接列表，并将该列表数据存储为对应元数据文件
-        # 基于下载链接，调用token进行文件下载
+                data_json = json.dumps(data)
+                with open(SaveDir + "/" + file_md5 + ".modisjson", "wb") as f:
+                    # 写文件用bytes而不是str，所以要转码
+                    f.write(bytes(data_json, "utf-8"))
+        except:
+            # todo 如果响应结果不是dict，则证明请求构建失败
+            pass
 
 
 USERAGENT = 'tis/download.py_1.0--' + sys.version.replace('\n', '').replace('\r', '')
@@ -214,10 +217,36 @@ def _main(SaveDir, URL, Token):
 
 if __name__ == '__main__':
     spider = modisDownload()
-    start_time = '2022-9-23'
-    end_time = '2022-09-30'
-    lon_start = '1'
-    lon_end = '2'
-    lan_start = '3'
-    lan_end = '4'
-    spider.main(start_time, end_time, lon_start, lon_end, lan_start, lan_end)
+    product = "CLDPROP_D3_MODIS_Aqua"
+    # product = "MOD09"
+    start_time = '2022-09-23'
+    end_time = '2022-10-30'
+    w = '1'
+    n = '2'
+    e = '3'
+    s = '4'
+    # 添加条件判断
+    if int(w) > 180:
+        w = "180"
+    elif int(w) < -180:
+        w = "-180"
+    if int(e) > 180:
+        e = "180"
+    elif int(e) < -180:
+        e = "-180"
+    if int(w) == int(e):
+        # todo 不能相同
+        pass
+
+    if int(n) > 90:
+        n = "90"
+    elif int(n) < -90:
+        n = "-90"
+    if int(s) > 90:
+        s = "90"
+    elif int(s) < -90:
+        s = "-90"
+    if int(n) == int(s):
+        # todo 不能相同
+        pass
+    spider.main(product, start_time, end_time, w, n, e, s)
