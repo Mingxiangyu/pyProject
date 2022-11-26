@@ -22,7 +22,7 @@ def get_file_md5_top10m(file_name):
     """
     m = hashlib.md5()  # 创建md5对象
     with open(file_name, 'rb') as fobj:
-        data = fobj.read(10240)
+        data = fobj.read(1024 * 1024 * 10)
         m.update(data)  # 更新md5对象
     return m.hexdigest()  # 返回md5对象
 
@@ -43,18 +43,15 @@ class gfsDownload(object):
             }
 
     # 请求网站获取url
-    def geturl(self, url, out):
+    def download(self, url, out):
         # toDo 添加代理，更新反扒
         print("下载时url为：" + url)
-
         response = requests.get(url, headers=self.headers)
-        # response = requests.get(url)
-        content = response.content
         with open(out, "wb") as code:
             code.write(response.content)
 
     def main(self, res, gfs_time, level, var, gfs_date, left_lon, right_lon, top_lat, bottom_lat):
-        for gfs_time in [0, 6, 12, 18]:  # 表示数据发布的时间分别是00,06,12,18
+        for gfs_time in [0, 6, 12, 18]:  # 表示数据发布的时间分别是00,06,12,18 todo 待确定是用户选择还是默认全采集
             if gfs_time < 10:
                 gfs_time = "0%d" % gfs_time
             elif gfs_time < 100:
@@ -88,12 +85,12 @@ class gfsDownload(object):
             # 这一步判断本地是否存在该文件，如果不存在就下载，存在的话就跳过
             if not os.path.exists(path):
                 print('downloading: ', path)
-                self.geturl(url, path)
+                self.download(url, path)
             else:
                 # 如果存在，但是字节数为空，则重新下载 todo 如果字节数对应不上网站对数据的描述，是不是也可以重新下载
                 if not os.path.getsize(path):
                     print('downloading: ', path)
-                    self.geturl(url, path)
+                    self.download(url, path)
                 else:
                     print('skipping: ', path)
 

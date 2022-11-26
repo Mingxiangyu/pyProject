@@ -61,7 +61,7 @@ def get_file_md5_top10m(file_name):
     """
     m = hashlib.md5()  # 创建md5对象
     with open(file_name, 'rb') as fobj:
-        data = fobj.read(10240)
+        data = fobj.read(1024 * 1024 * 10)
         m.update(data)  # 更新md5对象
     return m.hexdigest()  # 返回md5对象
 
@@ -114,8 +114,8 @@ class modisDownload(object):
                 _main(SaveDir, all_file_url_, Token)
 
                 # todo 添加数据来源
-                split_ = all_file_url_.split('/')[-1]
-                path = os.path.join(SaveDir, split_)
+                file_name = all_file_url_.split('/')[-1]
+                path = os.path.join(SaveDir, file_name)
                 file_md5 = get_file_md5_top10m(path)
                 print("数据md5为：" + file_md5)
                 data["id"] = file_md5
@@ -125,7 +125,7 @@ class modisDownload(object):
                     # 写文件用bytes而不是str，所以要转码
                     f.write(bytes(data_json, "utf-8"))
         except:
-            # todo 如果响应结果不是dict，则证明请求构建失败
+            # todo 如果响应结果不是dict，则证明请求构建失败，同时将响应数据记录日志
             pass
 
 
