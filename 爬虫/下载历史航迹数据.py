@@ -64,7 +64,10 @@ class AisDownload(object):
         print("下载时url为：" + url)
         response = requests.get(url, headers=self.headers, timeout=60)
         with open(out, "wb") as code:
-            code.write(response.content)
+            # requests.get(url)默认是下载在内存中的，下载完成才存到硬盘上，可以用Response.iter_content来边下载边存硬盘
+            for chunk in response.iter_content(chunk_size=1024):
+                code.write(chunk)
+            # code.write(response.content)
 
     def main(self, year, month):
         today = datetime.datetime.today()
