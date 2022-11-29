@@ -73,7 +73,6 @@ class modisDownload(object):
         # 下载请求链接
         # https://ladsweb.modaps.eosdis.nasa.gov/api/v1/files/product=MOD09&collection=6&dateRanges=2022-09-29..2022-09-29,2022-09-30..2022-09-30&areaOfInterest=x1y4,x2y3&dayCoverage=true&dnboundCoverage=true
         # https://ladsweb.modaps.eosdis.nasa.gov/api/v1/files/product=CLDPROP_D3_MODIS_Aqua&collection=5111&dateRanges=2013-01-02..2013-01-02&areaOfInterest=x-190y90,x180y10&dayCoverage=true&dnboundCoverage=true
-        # https://ladsweb.modaps.eosdis.nasa.gov/api/v1/files/product=CLDPROP_D3_MODIS_Aqua&collection=5111&dateRanges=2022-9-23..2022-10-30&areaOfInterest=x1y2,x3y4&dayCoverage=true&dnboundCoverage=true
         """
         参数1：时间起始范围 {2013-01-02..2013-01-02}
         参数2：经纬度范围 {90.8,61.9,119.7,51.1}  W: 90.8°, N: 61.9°, E: 119.7°, S: 51.1°
