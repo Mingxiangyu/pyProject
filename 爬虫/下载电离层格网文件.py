@@ -18,8 +18,6 @@ SaveDir = "D:\RS_data\GNSS"
 """
 正确下载链接
 https://cddis.nasa.gov/archive/gnss/products/ionex/2022/007/igsg0070.22i.Z
-生成的下载链接
-https://cddis.nasa.gov/archive/gnss/products/ionex/2022/007/igsg0070.21i.Z
 """
 
 
