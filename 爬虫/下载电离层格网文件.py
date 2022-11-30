@@ -7,9 +7,9 @@
 import hashlib
 import json
 import os
+import time
 
 import requests
-from fake_useragent import UserAgent
 from lxml import etree
 from requests import utils
 
@@ -19,6 +19,29 @@ SaveDir = "D:\RS_data\GNSS"
 正确下载链接
 https://cddis.nasa.gov/archive/gnss/products/ionex/2022/007/igsg0070.22i.Z
 """
+
+
+# overriding requests.Session.rebuild_auth to mantain headers when redirected
+class SessionWithHeaderRedirection(requests.Session):
+    AUTH_HOST = 'urs.earthdata.nasa.gov'
+
+    def __init__(self, username, password):
+        super().__init__()
+        self.auth = (username, password)
+
+    # Overrides from the library to keep headers when redirected to or from
+    # the NASA auth host.
+    def rebuild_auth(self, prepared_request, response):
+        headers = prepared_request.headers
+        url = prepared_request.url
+        if 'Authorization' in headers:
+            original_parsed = requests.utils.urlparse(response.request.url)
+            redirect_parsed = requests.utils.urlparse(url)
+            if (original_parsed.hostname != redirect_parsed.hostname) \
+                    and redirect_parsed.hostname != self.AUTH_HOST \
+                    and original_parsed.hostname != self.AUTH_HOST:
+                del headers['Authorization']
+        return
 
 
 def get_file_md5_top10m(file_name):
@@ -38,19 +61,21 @@ class gnssDownload(object):
     def __init__(self):
         self.login_url = 'https://urs.earthdata.nasa.gov'
         self.post_url = 'https://urs.earthdata.nasa.gov/login'
-        # 测试用的logined_url
-        # url = https://cddis.nasa.gov/archive/gnss/products/ionex/2021/004/igsg0040.21i.Z
         self.url = "https://cddis.nasa.gov/archive/gnss/products/ionex/{}/{}/igsg{}0.{}i.Z"
-        self.session = requests.Session()  # 神奇，会话处理Cookie
         self.username = 'xymeng'  # 个人账户信息及密码
         self.password = '18844120269oooOOO'
+        self.session = SessionWithHeaderRedirection(self.username, self.password)
+        self.headers = {
+            'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
+                          "Chrome/88.0.4324.190 Safari/537.36 "
+        }
+
         # 产生随机的User - Agent请求头进行访问
-        ua = UserAgent(verify_ssl=False)
-        for i in range(1, 30):
-            # 产生随机的User - Agent请求头进行访问
-            self.headers = {
-                'User-Agent': ua.random
-            }
+        # ua = UserAgent(verify_ssl=False)
+        # for i in range(1, 30):
+        #     self.headers = {
+        #         'User-Agent': ua.random
+        #     }
         self.cookie = self.getCookie()
 
     def token(self):
@@ -59,6 +84,14 @@ class gnssDownload(object):
         selector = etree.HTML(response.text)
         token = selector.xpath('//*[@id="login"]/input[2]/@value')[0]
         print('token: ' + str(token) + '\n')
+        '''
+        下面是另一种处理获取token
+        :param html:
+        return: 获取csrftoken
+        '''
+        # soup = BeautifulSoup(response.text, 'html.parser')
+        # res = soup.find("input", attrs={"name": "authenticity_token"})
+        # token = res["value"]
         return token
 
     def getCookie(self):
@@ -70,27 +103,40 @@ class gnssDownload(object):
             'password': self.password,
         }
         response = self.session.post(self.post_url, data=post_data, headers=self.headers)  # 模拟登录
-        print('模拟登录成功！\n')
+        if (response.status_code == 200):
+            print('模拟登录成功！\n')
+            time.sleep(5)
 
         cookie = response.cookies  # 里面有首次登录得到的Set-Cookie
         cookie = utils.dict_from_cookiejar(cookie)
-        print(cookie)
-        print(type(cookie))
-        print('\n')
-        self.cookie = cookie
+        # print(cookie)
         return cookie
 
     # 请求网站获取url
     def download(self, url, out):
         # toDo 添加代理，更新反扒
         print("下载时url为：" + url)
-        cookie = self.cookie
-        response = self.session.get(self.url, headers=self.headers, timeout=30, cookies=cookie)
-        with open(out, "wb") as code:
-            # requests.get(url)默认是下载在内存中的，下载完成才存到硬盘上，可以用Response.iter_content来边下载边存硬盘
-            for chunk in response.iter_content(chunk_size=1024):
-                code.write(chunk)
-            # code.write(response.content)
+        try:
+            # 手动设置cookie
+            # http_cookie = "_ga=GA1.4.481246173.1668751269; urs_guid_ops=59ebdaa8-a5d1-4fdf-b239-cfc272bf5d9a; _ga_WXLRFJLP5B=GS1.1.1669018357.1.1.1669018937.0.0.0; _ga_KQRB4LHBVM=GS1.1.1669178700.2.0.1669178700.0.0.0; _ga_GPQT4GL86Z=GS1.1.1669178700.2.0.1669179000.0.0.0; _gid=GA1.2.38923508.1669612982; _gid=GA1.4.38923508.1669612982; _ga_RLWG0EH56X=GS1.1.1669712745.8.1.1669713568.0.0.0; _ga_EG7FB6W5DL=GS1.1.1669713571.4.1.1669716573.0.0.0; _ga_76MJEEGE07=GS1.1.1669716894.1.1.1669717150.0.0.0; _gat_UA-62340125-2=1; _gat_GSA_ENOR0=1; _urs-gui_session=ab66c1b30d002262686c4b104d5d849c; _ga=GA1.1.481246173.1668751269; _ga_T0WYSFJPBT=GS1.1.1669776021.11.1.1669776479.0.0.0"
+            # cookie = {item.split('=')[0]: item.split('=')[1] for item in http_cookie.split('; ')}
+            # response = requests.get(url, headers=self.headers, timeout=30, cookies=cookie)
+
+            # 模拟登录获取cookie
+            # cookie = self.cookie
+            # response = self.session.get(url, headers=self.headers, timeout=30, cookies=cookie)
+
+            response = self.session.get(url, headers=self.headers, timeout=30)
+
+            # 在出现 http 错误时引发异常
+            response.raise_for_status()
+
+            with open(out, "wb") as code:
+                # requests.get(url)默认是下载在内存中的，下载完成才存到硬盘上，可以用Response.iter_content来边下载边存硬盘
+                for chunk in response.iter_content(chunk_size=1024):
+                    code.write(chunk)
+        except requests.exceptions.HTTPError as e:
+            print(e)
 
     def main(self, year, start_date_day, end_date_day):
         for day in range(start_date_day, end_date_day):
