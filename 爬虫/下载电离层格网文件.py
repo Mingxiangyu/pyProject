@@ -12,6 +12,7 @@ import time
 import requests
 from lxml import etree
 from requests import utils
+from tqdm import tqdm
 
 SaveDir = "D:\RS_data\GNSS"
 
@@ -131,10 +132,24 @@ class gnssDownload(object):
             # 在出现 http 错误时引发异常
             response.raise_for_status()
 
-            with open(out, "wb") as code:
-                # requests.get(url)默认是下载在内存中的，下载完成才存到硬盘上，可以用Response.iter_content来边下载边存硬盘
-                for chunk in response.iter_content(chunk_size=1024):
-                    code.write(chunk)
+            # 添加下载进度条
+            total = int(response.headers.get('content-length', 0))
+            with open(out, 'wb') as file, tqdm(
+                    desc=out,
+                    total=total,
+                    unit='iB',
+                    unit_scale=True,
+                    unit_divisor=1024,
+            ) as bar:
+                for data in response.iter_content(chunk_size=1024):
+                    size = file.write(data)
+                    bar.update(size)
+                    response.close()
+
+            # with open(out, "wb") as code:
+            #     requests.get(url)默认是下载在内存中的，下载完成才存到硬盘上，可以用Response.iter_content来边下载边存硬盘
+            # for chunk in response.iter_content(chunk_size=1024):
+            #     code.write(chunk)
         except requests.exceptions.HTTPError as e:
             print(e)
 
