@@ -144,7 +144,7 @@ class gnssDownload(object):
                 for data in response.iter_content(chunk_size=1024):
                     size = file.write(data)
                     bar.update(size)
-                    response.close()
+                response.close()
 
             # with open(out, "wb") as code:
             #     requests.get(url)默认是下载在内存中的，下载完成才存到硬盘上，可以用Response.iter_content来边下载边存硬盘

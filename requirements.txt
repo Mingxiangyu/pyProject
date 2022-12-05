@@ -16,3 +16,6 @@ siphon
 pillow
 pyftpdlib
 pip
+selenium
+tqdm
+madrigalweb

@@ -193,6 +193,7 @@ def sync(src, dest, tok):
         # 这一步判断本地是否存在该文件，如果不存在就下载，存在的话就跳过
         if not os.path.exists(path):
             print('downloading: ', path)
+            # 提前open是因为shutil.copyfileobj只能写打开的文件
             with open(path, 'w+b') as fh:
                 geturl(src, tok, fh)
         else:
@@ -205,7 +206,6 @@ def sync(src, dest, tok):
                 print('skipping: ', path)
     except IOError as e:
         print("open `%s': %s" % (e.filename, e.strerror), file=sys.stderr)
-        sys.exit(-1)
 
 
 def _main(SaveDir, URL, Token):
