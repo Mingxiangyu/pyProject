@@ -73,26 +73,24 @@ class AisDownload(object):
         today = datetime.datetime.today()
         today_year = today.year
         url_suf_list = []
+        zone_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
         if int(year) < 2009:
             # todo 结束，同时记录日志，提示数据不存在
             pass
         elif int(year) < 2011:
             # 11年前数据链接：https://coast.noaa.gov/htdata/CMSP/AISDataHandler/2010/01_January_2010/Zone1_2010_01.zip
-            zone_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
             for zone in zone_list:
                 url_suf = "%s_%s_%s/Zone%s_%s_%s.zip" % (
                     month, calendar.month_name[int(month)], year, zone, year, month)
                 url_suf_list.append(url_suf)
         elif int(year) < 2014:
             #  14年前数据链接： https://coast.noaa.gov/htdata/CMSP/AISDataHandler/2011/01/Zone10_2011_01.gdb.zip
-            zone_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
             for zone in zone_list:
                 url_suf = "%s/Zone%s_%s_%s.gdb.zip" % (
                     month, zone, year, month)
                 url_suf_list.append(url_suf)
         elif int(year) < 2015:
             # 15年前数据链接：https://coast.noaa.gov/htdata/CMSP/AISDataHandler/2014/01/Zone1_2014_01.zip
-            zone_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
             for zone in zone_list:
                 url_suf = "%s/Zone%s_%s_%s.zip" % (
                     month, zone, year, month)
