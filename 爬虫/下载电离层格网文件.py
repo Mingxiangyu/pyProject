@@ -70,6 +70,7 @@ class gnssDownload(object):
             'User-Agent': "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
                           "Chrome/88.0.4324.190 Safari/537.36 "
         }
+        self.cookie = self.getCookie()
 
         # 产生随机的User - Agent请求头进行访问
         # ua = UserAgent(verify_ssl=False)
@@ -77,7 +78,6 @@ class gnssDownload(object):
         #     self.headers = {
         #         'User-Agent': ua.random
         #     }
-        self.cookie = self.getCookie()
 
     def token(self):
         response = self.session.get(self.login_url, headers=self.headers, timeout=30)  # 可能会被封ip
