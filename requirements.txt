@@ -19,3 +19,12 @@ pip
 selenium
 tqdm
 madrigalweb
+chardet
+geopandas
+shapely
+pygame
+pyqt5
+ipy
+js2py
+pypiwin32
+pywin32
