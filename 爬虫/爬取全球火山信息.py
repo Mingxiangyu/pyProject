@@ -1392,7 +1392,8 @@ class volcanoDownload(object):
             # print(value)
 
         volcano_image = str(target.xpath('//img[@class="volcano-image"]/@src')[0])
-        image_url = "https://volcano.si.edu/" + volcano_image
+        volcano_image = volcano_image.replace("photos", "thumbs")  # 原volcano_image 为大图，为减少网络消耗，修改为thumbs
+        image_url = "https://volcano.si.edu" + volcano_image
         volcano_info_dict["image_url"] = image_url
 
         volcano_name = str(target.xpath('//div[@class="volcano-title-container"]/h3/text()')[0])
