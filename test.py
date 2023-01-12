@@ -1,64 +1,48 @@
-# # -*- codeing = utf-8 -*-
-# # @Time :2022/7/17 18:42
-# # @Author :xming
-# # @Version :1.0
-# # @Descriptioon :
-# # @File :  test.py
-#
-# # 字典存储无序的数据
-# name_map = {"name": "ljf", "age": 18, "price": 2.5};
-# print(name_map);
-# # 查询
-# print(name_map["name"]);
-# # 修改
-# name_map["age"] = 19;
-# print(name_map)
-# # 添加
-# name_map["adress"] = "beijing";
-# print(name_map)
-# # 删除
-# name_map.pop("adress");
-# print(name_map)
-# # 统计字符串个数
-# print(len(name_map))
-# # 合并字典,合并时已经存在某个键值对，后者覆盖前者
-# temp_map = {"address": "背景"}
-# name_map.update(temp_map);
-# print(name_map)
-# # 遍历
-# for m in name_map:
-#     print("遍历:%s" % {m, name_map[m]});
-# # 列表中存储字典，列表中存储多个字典
-# name_list = [{"name": "beijing", "adCode": 110100}, {"name": "tianjing", "adCode": 234000},
-#              {"name": "shanghai", "adCode": 45600}]
-# for k in name_list:
-#     print(k)
-#
-import json
+# -*- codeing = utf-8 -*-
+# @Time :2022/7/17 18:42
+# @Author :xming
+# @Version :1.0
+# @Descriptioon :
+# @File :  test.py
+# Base64 Encoder - encodes a folder of PNG files and creates a .py file with definitions
+import base64
+import os
 
-json_data = """{
-"favourite":{
-"bkmrk":{
-"id1490843709594066":{
-"guid":"904eff52277f403b89f6410fe2758646.11",
-"lcate":"1"
-},
-"id1490843712805183":{
-"guid":"58457f60eca64025bc43a978f9c98345.16",
-"lcate":"2"
-},
-"id149084371467327":{
-"guid":"a0f907f9dc8b40f689b083f3eba7228b.16",
-"lcate":"3"
-},
-"id1490843716295393":{
-"guid":"eb75d929455e468bb712e7bc2025d11a.16",
-"lcate":"4"
-}
-}
-}
-}"""
+import PySimpleGUI as sg
 
-data = json.loads(json_data)
-for v in data['favourite']['bkmrk'].values():
-    print("%s;%s" % (v['lcate'], v['guid']))
+'''
+    将图片转换为base64格式
+    先选择存放图片的文件夹
+    然后会生成一个outpt.py文件夹。里面存放了转换后的内容。用sublime打开。
+    input:  folder with .png .ico .gif 's
+    output: output.py file with variables
+'''
+
+def main():
+    OUTPUT_FILENAME = 'output.py'
+
+    folder = sg.popup_get_folder('Source folder for images\nImages will be encoded and results saved to %s'%OUTPUT_FILENAME,
+                               title='Base64 Encoder')
+
+    if not folder:
+        sg.popup_cancel('Cancelled - No valid folder entered')
+        return
+    try:
+        namesonly = [f for f in os.listdir(folder) if f.endswith('.png') or f.endswith('.ico') or f.endswith('.gif')]
+    except:
+        sg.popup_cancel('Cancelled - No valid folder entered')
+        return
+
+    outfile = open(os.path.join(folder, OUTPUT_FILENAME), 'w')
+
+    for i, file in enumerate(namesonly):
+        contents = open(os.path.join(folder, file), 'rb').read()
+        encoded = base64.b64encode(contents)
+        outfile.write('\n{} = {}'.format(file[:file.index(".")], encoded))
+        sg.OneLineProgressMeter('Base64 Encoding', i+1, len(namesonly), key='-METER-')
+
+    outfile.close()
+    sg.popup('Completed!', 'Encoded %s files'%(i+1))
+
+if __name__ == '__main__':
+    main()
