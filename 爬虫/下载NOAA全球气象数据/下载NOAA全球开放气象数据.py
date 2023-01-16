@@ -10,6 +10,9 @@ import os
 import requests
 from lxml import etree
 
+# 字段描述
+# https://www.ncei.noaa.gov/data/global-summary-of-the-day/doc/readme.txt
+
 tar_gz_url = 'https://www.ncei.noaa.gov/data/global-summary-of-the-day/archive/'
 # 定义请求头部信息
 headers = {'User-Agent': 'M'}
