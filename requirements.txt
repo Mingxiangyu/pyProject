@@ -28,3 +28,4 @@ ipy
 js2py
 pypiwin32
 pywin32
+openpyxl

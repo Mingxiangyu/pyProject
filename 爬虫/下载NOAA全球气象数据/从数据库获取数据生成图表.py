@@ -3,7 +3,7 @@ import pymysql
 db = pymysql.connect(host="211.157.132.19", port=17062, user="root", passwd="guoyao@123", db="bigdata_zhongbao",
                      charset="utf8")
 cursor = db.cursor()
-cursor.execute("select * from data where station='54511099999' and date>'2021-01-01'")
+cursor.execute("select * from hydrology where station='54511099999' and date>'2022-01-01' and date <'2022-01-31'")
 result = cursor.fetchall()
 # for i in result:
 #     print(i[6])
