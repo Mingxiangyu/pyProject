@@ -1,3 +1,6 @@
+import base64
+import os
+
 import requests
 from fake_useragent import UserAgent
 from lxml import etree
@@ -1354,6 +1357,17 @@ class volcanoDownload(object):
         html = response.text
         return html
 
+    # 图片转换成base64
+    def image_to_base64(self,path):
+        with open(path, 'rb') as img:
+            # 使用base64进行编码
+            b64encode = base64.b64encode(img.read())
+            s = b64encode.decode()
+            b64_encode = 'data:image/jpeg;base64,%s' % s  # base64前添加该段用于前端展示
+            print("原图base64编码长度：%d" % len(b64_encode))
+            # 返回base64编码字符串
+            return b64_encode
+
     # 解析url，获取数据
     def parse_html(self, html):
         target = etree.HTML(html)
@@ -1396,24 +1410,28 @@ class volcanoDownload(object):
         image_url = "https://volcano.si.edu" + volcano_image
         volcano_info_dict["image_url"] = image_url
 
+        response = requests.get(image_url, headers=self.headers)
+        # 数据下载
+        imageDir = "./volcanoImage"
+        if not os.path.exists(imageDir):
+            os.makedirs(imageDir)
+        image_name = image_url.split("/")[-1]
+        imagePath = imageDir + "/" + image_name
+        print(imagePath)
+        with open(imagePath, "wb") as code:
+            # requests.get(url)默认是下载在内存中的，下载完成才存到硬盘上，可以用Response.iter_content来边下载边存硬盘
+            for chunk in response.iter_content(chunk_size=1024):
+                code.write(chunk)
+        base64_code = self.image_to_base64(imagePath)
+        # 删除图片文件，避免造成垃圾
+        os.remove(imagePath)
+        volcano_info_dict["base64_code"] = base64_code
+
         volcano_name = str(target.xpath('//div[@class="volcano-title-container"]/h3/text()')[0])
         volcano_info_dict["volcano_name"] = volcano_name
 
         return volcano_info_dict
 
-        # toDo 暂定图片不下载，直接在线展示
-        # response = requests.get(image_url, headers=self.headers)
-        # # 数据下载
-        # imageDir = "./volcanoImage"
-        # if not os.path.exists(imageDir):
-        #     os.makedirs(imageDir)
-        # image_name = image_url.split("/")[-1]
-        # imagePath = imageDir + "/" + image_name
-        # print(imagePath)
-        # with open(imagePath, "wb") as code:
-        #     # requests.get(url)默认是下载在内存中的，下载完成才存到硬盘上，可以用Response.iter_content来边下载边存硬盘
-        #     for chunk in response.iter_content(chunk_size=1024):
-        #         code.write(chunk)
 
     def main(self):
         for i in range(len(volcano_number_list)):
