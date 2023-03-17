@@ -10,3 +10,12 @@ def get_nday_list(n):
 
 a = get_nday_list(30)
 print(a)
+
+# 获取当天日期和7天前日期
+today = datetime.date.today()
+month = today.month
+day = today.day
+
+timedelta = datetime.date.today() - datetime.timedelta(7)
+timedelta_month = timedelta.month
+timedelta_day = timedelta.day
