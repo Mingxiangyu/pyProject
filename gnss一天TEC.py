@@ -20,7 +20,7 @@ TEC = []
 TEC2D = np.zeros(shape=(71, 73))
 picnum = 1
 timenum = 1
-folder = r'/Users/ming/Downloads/AFG_rrd/'
+folder = r'C:\Users\zhouhuilin\Desktop\test'
 
 '''
 Search for each ionex file
@@ -28,8 +28,8 @@ Search for each ionex file
 
 for ifile in os.listdir(folder):
     '''
-    num: Record the count of the region
-    count: Record the count of the Map
+    num: Record the count of the region 记录区域计数
+    count: Record the count of the Map 记录Map的计数
     '''
     num = 1
     count = 1
@@ -44,6 +44,7 @@ for ifile in os.listdir(folder):
         for i in range(len(icontent0)):
             '''
             Turn list including other symbol into list only consisting of character
+            将包含其他符号的列表转换为仅包含字符的列表
             '''
             icontent1 = icontent0[i].split(' ')
             for x in range(icontent1.count('')):
@@ -60,6 +61,7 @@ for ifile in os.listdir(folder):
                     num = num + 1
                     '''
                     Begin putting TEC value into TSC list
+                    开始将 TEC 值放入 TSC 列表
                     '''
                     ynum = 0
 
