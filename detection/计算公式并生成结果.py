@@ -21,17 +21,17 @@ v = -0.007
 # l = {"type": 3, "start": 4.0667, "end": 897}
 # l1 = {"type": 2, "start": 897, "end": 4652.4}
 l = {"type": 3, "start": 4.0667, "end": 897,
-     "curve": [{"type": 1, "Channel": "AD[15]", "W": 0.25, "V": -0.009},
-               {"type": 2, "Channel": "AD[38]", "W": 0.25, "V": -0.006},
-               {"type": 3, "Channel": "AD[54]", "W": 0.25, "V": -0.009}]}
+     "curve": [{"curve_type": 1, "Channel": "AD[15]", "W": 0.25, "V": -0.009},
+               {"curve_type": 2, "Channel": "AD[38]", "W": 0.25, "V": -0.006},
+               {"curve_type": 3, "Channel": "AD[54]", "W": 0.25, "V": -0.009}]}
 l1 = {"type": 2, "start": 897, "end": 4652.4,
-      "curve": [{"type": 1, "Channel": "AD[15]", "W": 0.25, "V": -0.009},
-                {"type": 2, "Channel": "AD[38]", "W": 0.42, "V": -0.001},
-                {"type": 3, "Channel": None, "W": 1, "V": 0}]}
+      "curve": [{"curve_type": 1, "Channel": "AD[15]", "W": 0.25, "V": -0.009},
+                {"curve_type": 2, "Channel": "AD[38]", "W": 0.42, "V": -0.001},
+                {"curve_type": 3, "Channel": None, "W": 1, "V": 0}]}
 l2 = {"type": 1, "start": 4652.4, "end": 5149.667,
-      "curve": [{"type": 1, "Channel": "AD[25]", "W": 0.25, "V": -0.007},
-                {"type": 2, "Channel": None, "W": 1, "V": 0},
-                {"type": 3, "Channel": None, "W": 1, "V": 0}]}
+      "curve": [{"curve_type": 1, "Channel": "AD[25]", "W": 0.25, "V": -0.007},
+                {"curve_type": 2, "Channel": None, "W": 1, "V": 0},
+                {"curve_type": 3, "Channel": None, "W": 1, "V": 0}]}
 layer = [l, l1, l2]
 
 # 连接 MongoDB 数据库
@@ -178,18 +178,25 @@ def clean_data():
 
             # 获取本次使用哪条曲线
             curve_name = curve_item.get("Channel")
+            # 获取当前是第几类曲线
+            curve_type = curve_item.get("curve_type")
 
-            # 定义一个字典，存储当前 layer 下当前 curve（Channel） 下所有标签和对应的数据<标签：数据集合>
-            label_item = {}
-            # 循环 label 结果
-            for lable_depth in label_depth_list:
-                # 获取当前label 的起始值
-                label_start = lable_depth.get("StartDepth")
-                label_end = lable_depth.get("EndDepth")
-                label_label = lable_depth.get("Label")
+            # 根据不同类型曲线，获取不同的N
+            if curve_type == 1:
+                # 定义一个字典，存储当前 layer 下当前 curve（Channel） 下所有标签和对应的数据<标签：数据集合>
+                label_item = {}
+                # 循环 label 结果
+                for lable_depth in label_depth_list:
+                    label_label = lable_depth.get("Label")
 
-                # 如果当前 label 的 start 值比 layer_old_endDepth 值（上一个label的 end 值） 大，证明中间缺东西了，这些值认为是 N 标签的值
-                if label_start > layer_old_endDepth:
+                    # 如果当前 Label 不是E或A，则直接跳过
+                    if not label_label == "A" and not label_label == "E":
+                        continue
+
+                    # 获取当前label 的起始值
+                    label_start = lable_depth.get("StartDepth")
+                    label_end = lable_depth.get("EndDepth")
+
                     n_label_label = "N"
                     # 获取las文件中起始深度为 layer_old_endDepth ，label_start 的所有行数据
                     n_query = {'Depth': {'$gte': layer_old_endDepth, '$lte': label_start}}
@@ -212,9 +219,9 @@ def clean_data():
                         "label_end": label_start
                     }
 
-                    # 将当前 label 的起始值记录下
-                    start_end = label_item_start_end.get(n_label_label)
-                    if start_end:
+                    # 将当前 n_label 的起始值记录下
+                    n_start_end = label_item_start_end.get(n_label_label)
+                    if n_start_end:
                         label_item_start_end[n_label_label].append(n_label_start_end)
                     else:
                         label_item_start_end[n_label_label] = []
@@ -223,36 +230,195 @@ def clean_data():
                     # 更新上一条Label的截止深度
                     layer_old_endDepth = label_end
 
-                # 当前标签（label）的起始深度值
-                label_start_end = {
-                    "label_start": label_start,
-                    "label_end": label_end
-                }
+                    # 当前标签（label）的起始深度值
+                    label_start_end = {
+                        "label_start": label_start,
+                        "label_end": label_end
+                    }
 
-                # 将当前 label 的起始值记录下
-                start_end = label_item_start_end.get(label_label)
-                if start_end:
-                    label_item_start_end[label_label].append(label_start_end)
-                else:
-                    label_item_start_end[label_label] = []
-                    label_item_start_end[label_label].append(label_start_end)
+                    # 将当前 label 的起始值记录下
+                    start_end = label_item_start_end.get(label_label)
+                    if start_end:
+                        label_item_start_end[label_label].append(label_start_end)
+                    else:
+                        label_item_start_end[label_label] = []
+                        label_item_start_end[label_label].append(label_start_end)
 
-                # 获取las文件中起始深度为 StartDepth ，EndDepth 的所有行数据
-                query = {'Depth': {'$gte': label_start, '$lte': label_end}}
-                Depth = lascurve_collection.find(query)
+                    # 获取las文件中起始深度为 StartDepth ，EndDepth 的所有行数据
+                    query = {'Depth': {'$gte': label_start, '$lte': label_end}}
+                    Depth = lascurve_collection.find(query)
 
-                Depth_list = [doc for doc in Depth]
-                # 取出指定曲线 curve 那一列的值
-                curve_list_ = [Depth_Value.get(curve_name) for Depth_Value in Depth_list]
+                    Depth_list = [doc for doc in Depth]
+                    # 取出指定曲线 curve 那一列的值
+                    curve_list_ = [Depth_Value.get(curve_name) for Depth_Value in Depth_list]
 
-                # 判断当前label是否存在，如果存在则 extend（合并两个集合值），如果不存在则创建个新字典
-                judge_ = label_item.get(label_label)
-                if judge_:
-                    judge_.extend(curve_list_)
-                else:
-                    label_item[label_label] = curve_list_
+                    # 判断当前label是否存在，如果存在则 extend（合并两个集合值），如果不存在则创建个新字典
+                    judge_ = label_item.get(label_label)
+                    if judge_:
+                        judge_.extend(curve_list_)
+                    else:
+                        label_item[label_label] = curve_list_
+                channel_itme[curve_name] = label_item
 
-            channel_itme[curve_name] = label_item
+            if curve_type == 2:
+                # 定义一个字典，存储当前 layer 下当前 curve（Channel） 下所有标签和对应的数据<标签：数据集合>
+                label_item = {}
+                # 循环 label 结果
+                for lable_depth in label_depth_list:
+                    label_label = lable_depth.get("Label")
+
+                    # 如果当前 Label 不是E或A，则直接跳过
+                    if not label_label == "A" and not label_label == "B" and not label_label == "E":
+                        continue
+
+                    # 获取当前label 的起始值
+                    label_start = lable_depth.get("StartDepth")
+                    label_end = lable_depth.get("EndDepth")
+
+                    n_label_label = "N"
+                    # 获取las文件中起始深度为 layer_old_endDepth ，label_start 的所有行数据
+                    n_query = {'Depth': {'$gte': layer_old_endDepth, '$lte': label_start}}
+                    n_Depth = lascurve_collection.find(n_query)
+                    n_Depth_list = [doc for doc in n_Depth]
+
+                    # 取出指定曲线 curve 那一列的值
+                    n_curve_list = [n_Depth_Value.get(curve_name) for n_Depth_Value in n_Depth_list]
+
+                    # 判断当前label是否存在，如果存在则 extend（合并两个集合值），如果不存在则创建个新字典
+                    n_judge_ = label_item.get(n_label_label)
+                    if n_judge_:
+                        n_judge_.extend(n_curve_list)
+                    else:
+                        label_item[n_label_label] = n_curve_list
+
+                    # 当前标签（label）的起始深度值
+                    n_label_start_end = {
+                        "label_start": layer_old_endDepth,
+                        "label_end": label_start
+                    }
+
+                    # 将当前 n_label 的起始值记录下
+                    n_start_end = label_item_start_end.get(n_label_label)
+                    if n_start_end:
+                        label_item_start_end[n_label_label].append(n_label_start_end)
+                    else:
+                        label_item_start_end[n_label_label] = []
+                        label_item_start_end[n_label_label].append(n_label_start_end)
+
+                    # 更新上一条Label的截止深度
+                    layer_old_endDepth = label_end
+
+                    # 当前标签（label）的起始深度值
+                    label_start_end = {
+                        "label_start": label_start,
+                        "label_end": label_end
+                    }
+
+                    # 将当前 label 的起始值记录下
+                    start_end = label_item_start_end.get(label_label)
+                    if start_end:
+                        label_item_start_end[label_label].append(label_start_end)
+                    else:
+                        label_item_start_end[label_label] = []
+                        label_item_start_end[label_label].append(label_start_end)
+
+                    # 获取las文件中起始深度为 StartDepth ，EndDepth 的所有行数据
+                    query = {'Depth': {'$gte': label_start, '$lte': label_end}}
+                    Depth = lascurve_collection.find(query)
+
+                    Depth_list = [doc for doc in Depth]
+                    # 取出指定曲线 curve 那一列的值
+                    curve_list_ = [Depth_Value.get(curve_name) for Depth_Value in Depth_list]
+
+                    # 判断当前label是否存在，如果存在则 extend（合并两个集合值），如果不存在则创建个新字典
+                    judge_ = label_item.get(label_label)
+                    if judge_:
+                        judge_.extend(curve_list_)
+                    else:
+                        label_item[label_label] = curve_list_
+                channel_itme[curve_name] = label_item
+
+            if curve_type == 3:
+                # 定义一个字典，存储当前 layer 下当前 curve（Channel） 下所有标签和对应的数据<标签：数据集合>
+                label_item = {}
+                # 循环 label 结果
+                for lable_depth in label_depth_list:
+                    label_label = lable_depth.get("Label")
+
+                    # 如果当前 Label 不是E或A，则直接跳过
+                    if not label_label == "A" and not label_label == "B" and not label_label == "C" and not label_label == "E":
+                        continue
+
+                    # 获取当前label 的起始值
+                    label_start = lable_depth.get("StartDepth")
+                    label_end = lable_depth.get("EndDepth")
+
+                    n_label_label = "N"
+                    # 获取las文件中起始深度为 layer_old_endDepth ，label_start 的所有行数据
+                    n_query = {'Depth': {'$gte': layer_old_endDepth, '$lte': label_start}}
+                    n_Depth = lascurve_collection.find(n_query)
+                    n_Depth_list = [doc for doc in n_Depth]
+
+                    # 取出指定曲线 curve 那一列的值
+                    n_curve_list = [n_Depth_Value.get(curve_name) for n_Depth_Value in n_Depth_list]
+
+                    # 判断当前label是否存在，如果存在则 extend（合并两个集合值），如果不存在则创建个新字典
+                    n_judge_ = label_item.get(n_label_label)
+                    if n_judge_:
+                        n_judge_.extend(n_curve_list)
+                    else:
+                        label_item[n_label_label] = n_curve_list
+
+                    # 当前标签（label）的起始深度值
+                    n_label_start_end = {
+                        "label_start": layer_old_endDepth,
+                        "label_end": label_start
+                    }
+
+                    # 将当前 n_label 的起始值记录下
+                    n_start_end = label_item_start_end.get(n_label_label)
+                    if n_start_end:
+                        label_item_start_end[n_label_label].append(n_label_start_end)
+                    else:
+                        label_item_start_end[n_label_label] = []
+                        label_item_start_end[n_label_label].append(n_label_start_end)
+
+                    # 更新上一条Label的截止深度
+                    layer_old_endDepth = label_end
+
+                    # 当前标签（label）的起始深度值
+                    label_start_end = {
+                        "label_start": label_start,
+                        "label_end": label_end
+                    }
+
+                    # 将当前 label 的起始值记录下
+                    start_end = label_item_start_end.get(label_label)
+                    if start_end:
+                        label_item_start_end[label_label].append(label_start_end)
+                    else:
+                        label_item_start_end[label_label] = []
+                        label_item_start_end[label_label].append(label_start_end)
+
+                    # 获取las文件中起始深度为 StartDepth ，EndDepth 的所有行数据
+                    query = {'Depth': {'$gte': label_start, '$lte': label_end}}
+                    Depth = lascurve_collection.find(query)
+
+                    Depth_list = [doc for doc in Depth]
+                    # 取出指定曲线 curve 那一列的值
+                    curve_list_ = [Depth_Value.get(curve_name) for Depth_Value in Depth_list]
+
+                    # 判断当前label是否存在，如果存在则 extend（合并两个集合值），如果不存在则创建个新字典
+                    judge_ = label_item.get(label_label)
+                    if judge_:
+                        judge_.extend(curve_list_)
+                    else:
+                        label_item[label_label] = curve_list_
+                channel_itme[curve_name] = label_item
+            # 如果曲线名称为空，则当前曲线不进行后续计算
+            # if not curve_name:
+            #     continue
+
         # 该 layer 内 各曲线 循环完后更新全局old_EndDepth 值，避免下一次 layer 获取 old_EndDepth 值从0开始
         old_EndDepth = layer_old_endDepth
 
@@ -270,7 +436,7 @@ def clean_data():
 
             channel_start_end = {
                 "layer": l1_type,
-                "channel_type": channel,
+                "channel_name": channel,
                 "W": channel_w,
                 "V": channel_v
             }
@@ -281,7 +447,7 @@ def clean_data():
                     start_end_get = label_item_start_end.get(label)
                     channel_label = {
                         "layer": l1_type,
-                        "channel_type": channel,
+                        "channel_name": channel,
                         "label_type": label,
                         "label_start_end": start_end_get,
                         "data": value,
@@ -306,6 +472,7 @@ data = clean_data()
 
 def curve_value_calculate(data, curve_depth, las_curve):
     calculate_list = []
+    depth_list = []
     for layer_data in data:
         layer_start = layer_data.get("layer_start")
         layer_end = layer_data.get("layer_end")
@@ -342,13 +509,23 @@ def curve_value_calculate(data, curve_depth, las_curve):
                     label_start = label_start_end_item.get("label_start")
                     label_end = label_start_end_item.get("label_end")
 
+                    # 添加该深度数据值，方便后续查看
+                    if not depth_list:
+                        depth_list.append(curve_depth)
+                        depth_list.append(label_item.get("layer"))
+
                     # 判断当前深度是否在该 label 下
                     if is_between(label_start, curve_depth, label_end):
                         layer_type = label_item.get("layer")
                         label_type = label_item.get('label_type')
+
+                        if not len(depth_list) > 2:
+                            # 如果 depth_list 的size不大于2，则证明还没有添加 label_type
+                            depth_list.append(label_item.get('label_type'))
+
                         # 获取本次曲线名称
-                        channel_type = label_item.get('channel_type')
-                        curve_value = las_curve.get(channel_type)
+                        channel_name = label_item.get('channel_name')
+                        curve_value = las_curve.get(channel_name)
                         calculate = getCalculate(layer_type=layer_type, label_label=label_type,
                                                  a_jun=a_jun, b_jun=b_jun, c_jun=c_jun, e_jun=e_jun, n_jun=n_jun,
                                                  w=channel_w, v=channel_v, curve_value=curve_value)
@@ -359,7 +536,8 @@ def curve_value_calculate(data, curve_depth, las_curve):
                     continue  # 内层循环未被 break，继续执行外层循环
                 break
                 # 如果深度在所有都没有，则返回
-    return calculate_list
+
+    return calculate_list, depth_list
 
 
 def write_data(data):
@@ -368,18 +546,18 @@ def write_data(data):
     las_curve_list = lascurve_collection.find()
     for las_curve in las_curve_list:
         curve_depth = las_curve.get("Depth")
-        curve_depth_list.append(curve_depth)
 
-        calculate = curve_value_calculate(data, curve_depth, las_curve)
+        calculate, depth_list = curve_value_calculate(data, curve_depth, las_curve)
         curve_value_list.append(calculate)
+        curve_depth_list.append(depth_list)
     # toDo 存储到数据库中
     # 将列表数据存储到 CSV 文件中
     with open('my_list.csv', 'w', newline='') as f:
         writer = csv.writer(f)
+        csv_h0eader = ["Depth", "Layer", "Lable", "Curve1", "Curve2", "Curve3"]
+        writer.writerow(csv_h0eader)
         for i in range(len(curve_depth_list)):
-            # merged_list = curve_depth_list[i] + list(curve_value_list)
-            # writer.writerow(merged_list)
-            writer.writerow([curve_depth_list[i]] + [row for row in curve_value_list[i]])
+            writer.writerow([row for row in curve_depth_list[i]] + [row for row in curve_value_list[i]])
 
 
 write_data(data)
