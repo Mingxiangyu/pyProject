@@ -32,11 +32,21 @@ db = client["mydatabase"]
 collection = db['lascurve']
 
 # 插入数据到 MongoDB 中
-collection.insert_many(data_json)
+# collection.insert_many(data_json)
 
 df = pd.read_csv('G:\软件备份\Project\测井\项目所需\Case-3文件及说明\Case-3_Label.csv', encoding='utf-8')
 data_json = df.to_dict(orient='records')
 db = client["mydatabase"]
 # 标签表
 collection = db['label']
+# collection.insert_many(data_json)
+
+
+df = pd.read_csv("E:\WorkSpace\pyWorkSpace\pyProject\detection\my_list.csv", encoding='utf-8')
+data_json = df.to_dict(orient='records')
+db = client["mydatabase"]
+# 标签表
+collection = db['Calculate']
 collection.insert_many(data_json)
+
+

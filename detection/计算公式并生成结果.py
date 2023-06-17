@@ -18,8 +18,6 @@ v = -0.007
 # toDo 修改N的识别逻辑
 
 # toDo 井构表数据，待放入库中，从库中查询
-# l = {"type": 3, "start": 4.0667, "end": 897}
-# l1 = {"type": 2, "start": 897, "end": 4652.4}
 l = {"type": 3, "start": 4.0667, "end": 897,
      "curve": [{"curve_type": 1, "Channel": "AD[15]", "W": 0.25, "V": -0.009},
                {"curve_type": 2, "Channel": "AD[38]", "W": 0.25, "V": -0.006},
@@ -169,7 +167,8 @@ def clean_data():
         # 定义一个字典，存储当前 layer 下所有 curve（Channel） 的数据
         channel_itme = {}
 
-        label_item_start_end = {}
+        # 定义一个字典，存储当前 layer 下所有 curve（Channel） 的起始数据
+        label_start_end_item = {}
 
         # 循环曲线参数
         for curve_item in curve_list:
@@ -185,6 +184,8 @@ def clean_data():
             if curve_type == 1:
                 # 定义一个字典，存储当前 layer 下当前 curve（Channel） 下所有标签和对应的数据<标签：数据集合>
                 label_item = {}
+                # 定义一个字典，存储当前 layer 下当前 curve（Channel） 下所有标签和对应的起始数据
+                label_item_start_end={}
                 # 循环 label 结果
                 for lable_depth in label_depth_list:
                     label_label = lable_depth.get("Label")
@@ -259,10 +260,13 @@ def clean_data():
                     else:
                         label_item[label_label] = curve_list_
                 channel_itme[curve_name] = label_item
+                label_start_end_item[curve_name] = label_item_start_end
 
             if curve_type == 2:
                 # 定义一个字典，存储当前 layer 下当前 curve（Channel） 下所有标签和对应的数据<标签：数据集合>
                 label_item = {}
+                # 定义一个字典，存储当前 layer 下当前 curve（Channel） 下所有标签和对应的起始数据
+                label_item_start_end = {}
                 # 循环 label 结果
                 for lable_depth in label_depth_list:
                     label_label = lable_depth.get("Label")
@@ -337,10 +341,13 @@ def clean_data():
                     else:
                         label_item[label_label] = curve_list_
                 channel_itme[curve_name] = label_item
+                label_start_end_item[curve_name] = label_item_start_end
 
             if curve_type == 3:
                 # 定义一个字典，存储当前 layer 下当前 curve（Channel） 下所有标签和对应的数据<标签：数据集合>
                 label_item = {}
+                # 定义一个字典，存储当前 layer 下当前 curve（Channel） 下所有标签和对应的起始数据
+                label_item_start_end = {}
                 # 循环 label 结果
                 for lable_depth in label_depth_list:
                     label_label = lable_depth.get("Label")
@@ -415,9 +422,7 @@ def clean_data():
                     else:
                         label_item[label_label] = curve_list_
                 channel_itme[curve_name] = label_item
-            # 如果曲线名称为空，则当前曲线不进行后续计算
-            # if not curve_name:
-            #     continue
+                label_start_end_item[curve_name] = label_item_start_end
 
         # 该 layer 内 各曲线 循环完后更新全局old_EndDepth 值，避免下一次 layer 获取 old_EndDepth 值从0开始
         old_EndDepth = layer_old_endDepth
@@ -444,6 +449,7 @@ def clean_data():
             # 如果该 channel（曲线） 是空的，则直接对data复制为空
             if channel:
                 for label, value in channel_value.items():
+                    label_item_start_end = label_start_end_item.get(channel)
                     start_end_get = label_item_start_end.get(label)
                     channel_label = {
                         "layer": l1_type,
