@@ -1,0 +1,57 @@
+# 只填入token就可运行,建议加入白名单id，如果觉得刷新消息间隔久了可以调低。绘图参数看个人喜好
+
+# telegram的token，以下是格式参考，请修改成自己的机器人token
+TOKEN = 1234567899:ABCDEFGHIJKLMNOP_QRSTUVWXYZvXpM8thc
+
+# 白名单id,不限制则为空
+CHAT_ID = 
+
+# 刷新消息间隔
+delayTime = 5
+
+# 本地sd地址
+localurl = http://127.0.0.1:7860
+
+# 保存图片位置
+temp_dir = ./image
+
+# 允许的最大文件名长度
+max_filename_length = 100
+
+# 绘图默认参数
+# 步数
+defaultSteps = 28
+
+# 负面词
+defaultNegative_prompt = paintings, sketches, (worst quality:2),(low quality:2), (extra fingers:2), (extra toes:2),bad-picture-chill-75v, badhandv4, easynegative, negative_hand-neg, ng_deepnegative_v1_75t
+
+# 种子
+defaultSeed = -1
+
+# 采样方式
+defaultSampler_index = DPM++ 2M Karras
+
+# 相关性
+defaultCfg_scale = 7.0
+
+# 大小
+defaultSize = 512x768
+
+# 超分辨率开关
+defaultEnable_hr = False
+
+# 超分辨率倍数
+defaultHr_scale = 2
+
+# 超分辨率宽高
+defaultHr_resize_x = 1024
+defaultHr_resize_y = 1536
+
+# 放大算法
+defaultHr_upscaler = R-ESRGAN 4x+
+
+# 放大采样次数
+defaultHr_second_pass_steps = 5
+
+# 重绘幅度
+defaultDenoising_strength = 0.4
