@@ -506,8 +506,10 @@ def curve_value_calculate(data, curve_depth, las_curve):
     :param las_curve:  曲线深度对象
     :return:
     """
-    calculate_list = []
-    depth_list = []
+
+    # 定义对象接收该数据参数 方便后续查看
+    depth_item_dict = {"Depth": curve_depth}
+
     for layer_data in data:
         layer_start = layer_data.get("layer_start")
         layer_end = layer_data.get("layer_end")
@@ -516,12 +518,33 @@ def curve_value_calculate(data, curve_depth, las_curve):
         if not is_between(layer_start, curve_depth, layer_end):
             continue
 
-        # 获取当前 layer 中所有 label 标签集合
-        layer_item = layer_data.get("layer_item")
-        for layer_item_data in layer_item:
-            channel_data = layer_item_data.get('channel_data')
-            channel_w = layer_item_data.get('W')
-            channel_v = layer_item_data.get('V')
+        # 记录当前深度属于哪个层级  方便后续查看
+        layer_type = layer_data.get("layer_type")
+        depth_item_dict["layer_type"] = layer_type
+        # 将子字典放入字典中
+        depth_channel_item_dict_list = []
+
+        # 获取当前 layer 中所有 channel 标签集合
+        channel_list = layer_data.get("layer_item")
+        # 循环所有 channel
+        for channel_item_data in channel_list:
+            # 获取当前 channel 中所有 label 标签集合
+            channel_data = channel_item_data.get('channel_data')
+            channel_w = channel_item_data.get('W')
+            channel_v = channel_item_data.get('V')
+
+            # 记录当前 曲线值 属于哪个曲线，以及管道的信息  方便后续查看，放在一个子字典中，避免后续下一个曲线覆盖了
+            channel_name = channel_item_data.get("channel_name")
+            LayerODin = channel_item_data.get("LayerODin")
+            LayerWtLbFt = channel_item_data.get("LayerWtLbFt")
+            LayerNomThkin = channel_item_data.get("LayerNomThkin")
+            depth_channel_item_dict = {"channel_name": channel_name}
+            depth_channel_item_dict["LayerODin"] = LayerODin
+            depth_channel_item_dict["LayerWtLbFt"] = LayerWtLbFt
+            depth_channel_item_dict["LayerNomThkin"] = LayerNomThkin
+            depth_channel_item_dict["LayerNomThkin"] = LayerNomThkin
+            depth_channel_item_dict["label_type"] = None
+            depth_channel_item_dict["curen_calculate"] = None
 
             # 因为下面计算可能用上所有均值，所以提前获取所有均值
             n_jun, a_jun, b_jun, c_jun, e_jun = [0 for i in range(5)]
@@ -537,6 +560,7 @@ def curve_value_calculate(data, curve_depth, las_curve):
                 elif label_item.get("label_type") == "E":
                     e_jun = label_item.get("avg")
 
+            # 循环曲线数据
             for label_item in channel_data:
                 # 获取当前 label 下所有起始深度集合
                 label_start_end = label_item.get("label_start_end")
@@ -544,19 +568,13 @@ def curve_value_calculate(data, curve_depth, las_curve):
                     label_start = label_start_end_item.get("label_start")
                     label_end = label_start_end_item.get("label_end")
 
-                    # 添加该深度数据值，方便后续查看
-                    if not depth_list:
-                        depth_list.append(curve_depth)
-                        depth_list.append(label_item.get("layer"))
-
                     # 判断当前深度是否在该 label 下
                     if is_between(label_start, curve_depth, label_end):
                         layer_type = label_item.get("layer")
                         label_type = label_item.get('label_type')
 
-                        if not len(depth_list) > 2:
-                            # 如果 depth_list 的size不大于2（即上面的深度数据值size），则证明还没有添加 label_type
-                            depth_list.append(label_item.get('label_type'))
+                        # 记录曲线值相关信息  方便后续查看
+                        depth_channel_item_dict["label_type"] = label_type
 
                         # 获取本次曲线名称
                         channel_name = label_item.get('channel_name')
@@ -564,35 +582,78 @@ def curve_value_calculate(data, curve_depth, las_curve):
                         calculate = getCalculate(layer_type=layer_type, label_label=label_type,
                                                  a_jun=a_jun, b_jun=b_jun, c_jun=c_jun, e_jun=e_jun, n_jun=n_jun,
                                                  w=channel_w, v=channel_v, curve_value=curve_value)
-                        # 得到计算结果后返回
-                        calculate_list.append(calculate)
+                        # 记录曲线值相关信息  方便后续查看
+                        depth_channel_item_dict["curen_calculate"] = calculate
+                        depth_channel_item_dict_list.append(depth_channel_item_dict)
                         break
                 else:
                     continue  # 内层循环未被 break，继续执行外层循环
                 break
                 # 如果深度在所有都没有，则返回
 
-    return calculate_list, depth_list
+            depth_item_dict["channel_item_dict"] = depth_channel_item_dict_list
+
+    return depth_item_dict
+
+
+def flatten_value(dic):
+    """
+    递归获取这个字典中所有value（包含子字典）
+    :param dic:
+    :return:
+    """
+    result = []
+    for value in dic.values():
+        if isinstance(value, dict):
+            result.extend(flatten_value(value))
+        elif isinstance(value, list):
+            for elem in value:
+                result.extend(flatten_value(elem))
+        else:
+            result.append(value)
+    return result
+
+
+def flatten_key(dic):
+    result = []
+    for key in dic.keys():
+        value = dic[key]
+        if isinstance(value, dict):
+            result.extend(flatten_key(value))
+        elif isinstance(value, list):
+            for elem in value:
+                result.extend(flatten_key(elem))
+        else:
+            result.append(key)
+    return result
 
 
 def write_data(data):
-    curve_value_list = []
-    curve_depth_list = []
     las_curve_list = lascurve_collection.find()
+    depth_list = []
+    depth_header_list = []
     for las_curve in las_curve_list:
         curve_depth = las_curve.get("Depth")
 
-        calculate, depth_list = curve_value_calculate(data, curve_depth, las_curve)
-        curve_value_list.append(calculate)
-        curve_depth_list.append(depth_list)
+        depth_item_dict = curve_value_calculate(data, curve_depth, las_curve)
+
+        depth_item_list = flatten_value(depth_item_dict)
+        depth_list.append(depth_item_list)
+
+        # 添加csv表头
+        if len(depth_header_list) < len(depth_item_list):
+            depth_header_list = flatten_key(depth_item_dict)
+
     # toDo 存储到数据库中
     # 将列表数据存储到 CSV 文件中
     with open('my_list.csv', 'w', newline='') as f:
         writer = csv.writer(f)
-        csv_h0eader = ["Depth", "Layer", "Lable", "Curve1", "Curve2", "Curve3"]
-        writer.writerow(csv_h0eader)
-        for i in range(len(curve_depth_list)):
-            writer.writerow([row for row in curve_depth_list[i]] + [row for row in curve_value_list[i]])
+
+        writer.writerow(depth_header_list)
+        for i in range(len(depth_list)):
+            # merged_list = curve_depth_list[i] + list(curve_value_list)
+            # writer.writerow(merged_list)
+            writer.writerow(depth_list[i])
 
 
 write_data(data)
