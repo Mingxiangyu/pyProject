@@ -160,6 +160,7 @@ def clean_data():
         curve_list = layer_value.get("curve")
 
         #     将起始深度当做查询参数进行 label 查询
+        # toDo 需要修改，是大于等于还是大于
         query = {'StartDepth': {'$gte': l1_start}, "EndDepth": {'$lte': l1_end}}
         Depth = label_collection.find(query)
         label_depth_list = list(Depth[:])
@@ -192,6 +193,7 @@ def clean_data():
                 if label_start > layer_old_endDepth:
                     n_label_label = "N"
                     # 获取las文件中起始深度为 layer_old_endDepth ，label_start 的所有行数据
+                    # toDo 需要修改，是大于等于还是大于
                     n_query = {'Depth': {'$gte': layer_old_endDepth, '$lte': label_start}}
                     n_Depth = lascurve_collection.find(n_query)
                     n_Depth_list = [doc for doc in n_Depth]
@@ -238,6 +240,7 @@ def clean_data():
                     label_item_start_end[label_label].append(label_start_end)
 
                 # 获取las文件中起始深度为 StartDepth ，EndDepth 的所有行数据
+                # toDo 需要修改，是大于等于还是大于
                 query = {'Depth': {'$gte': label_start, '$lte': label_end}}
                 Depth = lascurve_collection.find(query)
 
