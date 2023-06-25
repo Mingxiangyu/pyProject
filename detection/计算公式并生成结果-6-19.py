@@ -57,6 +57,45 @@ lascurve_collection = db['lascurve']
 lascurve_collection.create_index([("Depth", pymongo.ASCENDING)])
 # 获取label（标签表）数据
 label_collection = db['label']
+# 获取数据表
+collection = db['Calculate']
+
+
+def flatten_value(dic):
+    """
+    递归获取这个字典中所有value（包含子字典）
+    :param dic:
+    :return:
+    """
+    result = []
+    for value in dic.values():
+        if isinstance(value, dict):
+            result.extend(flatten_value(value))
+        elif isinstance(value, list):
+            for elem in value:
+                result.extend(flatten_value(elem))
+        else:
+            result.append(value)
+    return result
+
+
+def flatten_key(dic):
+    """
+    递归获取这个字典中所有key（包含子字典）
+    :param dic:
+    :return:
+    """
+    result = []
+    for key in dic.keys():
+        value = dic[key]
+        if isinstance(value, dict):
+            result.extend(flatten_key(value))
+        elif isinstance(value, list):
+            for elem in value:
+                result.extend(flatten_key(elem))
+        else:
+            result.append(key)
+    return result
 
 
 def getAvg(data):
@@ -713,66 +752,41 @@ def curve_value_calculate(data, curve_depth, las_curve):
     return depth_item_dict
 
 
-def flatten_value(dic):
-    """
-    递归获取这个字典中所有value（包含子字典）
-    :param dic:
-    :return:
-    """
-    result = []
-    for value in dic.values():
-        if isinstance(value, dict):
-            result.extend(flatten_value(value))
-        elif isinstance(value, list):
-            for elem in value:
-                result.extend(flatten_value(elem))
-        else:
-            result.append(value)
-    return result
-
-
-def flatten_key(dic):
-    result = []
-    for key in dic.keys():
-        value = dic[key]
-        if isinstance(value, dict):
-            result.extend(flatten_key(value))
-        elif isinstance(value, list):
-            for elem in value:
-                result.extend(flatten_key(elem))
-        else:
-            result.append(key)
-    return result
-
-
 def write_data(data):
     las_curve_list = lascurve_collection.find()
-    depth_list = []
-    depth_header_list = []
+    # csv数据准备
+    csv_depth_list = []
+    csv_header_depth_list = []
+    # 数据库数据准备
+    db_depth_list = []
     for las_curve in las_curve_list:
         curve_depth = las_curve.get("Depth")
 
         depth_item_dict = curve_value_calculate(data, curve_depth, las_curve)
 
+        db_depth_list.append(depth_item_dict)
+
         # toDo 如果数据前面没有，后面有值，用不用前面补None
         depth_item_list = flatten_value(depth_item_dict)
-        depth_list.append(depth_item_list)
+        csv_depth_list.append(depth_item_list)
 
         # 添加csv表头
-        if len(depth_header_list) < len(depth_item_list):
-            depth_header_list = flatten_key(depth_item_dict)
+        if len(csv_header_depth_list) < len(depth_item_list):
+            csv_header_depth_list = flatten_key(depth_item_dict)
 
     print("开始写入数据")
-    # toDo 存储到数据库中
+    #  存储到数据库中
+    collection.insert_many(db_depth_list)
+
     # 将列表数据存储到 CSV 文件中
     with open('my_list.csv', 'w', newline='') as f:
         writer = csv.writer(f)
 
-        writer.writerow(depth_header_list)
-        for i in range(len(depth_list)):
+        writer.writerow(csv_header_depth_list)
+        for i in range(len(csv_depth_list)):
             # merged_list = curve_depth_list[i] + list(curve_value_list)
             # writer.writerow(merged_list)
-            writer.writerow(depth_list[i])
+            writer.writerow(csv_depth_list[i])
 
 
 write_data(data)
