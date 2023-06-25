@@ -11,11 +11,6 @@ import math
 import pymongo
 from pymongo import MongoClient
 
-w = 0.25
-v = -0.007
-
-# toDo 修改N的识别逻辑
-
 # toDo 井构表数据，待放入库中，从库中查询
 l = {"type": 3, "start": 4.0667, "end": 897,
      "curve": [{"curve_type": 1, "Channel": "AD[15]", "W": 0.25, "V": -0.009, "LayerODin": 9.625, "LayerWtLbFt": 40,
@@ -700,7 +695,7 @@ def curve_value_calculate(data, curve_depth, las_curve):
             depth_channel_item_dict["LayerNomThkin"] = LayerNomThkin
             depth_channel_item_dict["LayerNomThkin"] = LayerNomThkin
             depth_channel_item_dict["label_type"] = None
-            depth_channel_item_dict["curen_calculate"] = None
+            depth_channel_item_dict["curve_calculate"] = None
 
             # 因为下面计算可能用上所有均值，所以提前获取所有均值
             n_jun, a_jun, b_jun, c_jun, e_jun = [0 for i in range(5)]
@@ -739,7 +734,7 @@ def curve_value_calculate(data, curve_depth, las_curve):
                                                  a_jun=a_jun, b_jun=b_jun, c_jun=c_jun, e_jun=e_jun, n_jun=n_jun,
                                                  w=channel_w, v=channel_v, curve_value=curve_value)
                         # 记录曲线值相关信息  方便后续查看
-                        depth_channel_item_dict["curen_calculate"] = calculate
+                        depth_channel_item_dict["curve_calculate"] = calculate
                         depth_channel_item_dict_list.append(depth_channel_item_dict)
                         break
                 else:

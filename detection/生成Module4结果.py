@@ -35,15 +35,21 @@ calculate_collection = db['Calculate']
 
 # toDo 井构表数据，待放入库中，从库中查询
 l = {"type": 3, "start": 4.0667, "end": 897,
-     "curve": [{"curve_type": 1, "Channel": "AD[15]", "W": 0.25, "V": -0.009},
-               {"curve_type": 2, "Channel": "AD[38]", "W": 0.25, "V": -0.006},
-               {"curve_type": 3, "Channel": "AD[54]", "W": 0.25, "V": -0.009}]}
+     "curve": [{"curve_type": 1, "Channel": "AD[15]", "W": 0.25, "V": -0.009, "LayerODin": 9.625, "LayerWtLbFt": 40,
+                "LayerNomThkin": 0.395},
+               {"curve_type": 2, "Channel": "AD[38]", "W": 0.25, "V": -0.006, "LayerODin": 13.375, "LayerWtLbFt": 72,
+                "LayerNomThkin": 0.514},
+               {"curve_type": 3, "Channel": "AD[54]", "W": 0.25, "V": -0.009, "LayerODin": 18.625, "LayerWtLbFt": 115,
+                "LayerNomThkin": 0.594}]}
 l1 = {"type": 2, "start": 897, "end": 4652.4,
-      "curve": [{"curve_type": 1, "Channel": "AD[15]", "W": 0.25, "V": -0.009},
-                {"curve_type": 2, "Channel": "AD[38]", "W": 0.42, "V": -0.001},
+      "curve": [{"curve_type": 1, "Channel": "AD[15]", "W": 0.25, "V": -0.009, "LayerODin": 9.625, "LayerWtLbFt": 40,
+                 "LayerNomThkin": 0.395},
+                {"curve_type": 2, "Channel": "AD[38]", "W": 0.42, "V": -0.001, "LayerODin": 13.375, "LayerWtLbFt": 72,
+                 "LayerNomThkin": 0.514},
                 {"curve_type": 3, "Channel": None, "W": 1, "V": 0}]}
 l2 = {"type": 1, "start": 4652.4, "end": 5149.667,
-      "curve": [{"curve_type": 1, "Channel": "AD[25]", "W": 0.25, "V": -0.007},
+      "curve": [{"curve_type": 1, "Channel": "AD[25]", "W": 0.25, "V": -0.007, "LayerODin": 9.625, "LayerWtLbFt": 40,
+                 "LayerNomThkin": 0.395},
                 {"curve_type": 2, "Channel": None, "W": 1, "V": 0},
                 {"curve_type": 3, "Channel": None, "W": 1, "V": 0}]}
 layer = [l, l1, l2]
@@ -59,8 +65,6 @@ def clean_data():
         l1_start = layer_value.get("start")
         l1_end = layer_value.get("end")
         l1_type = layer_value.get("type")
-        # 获取当前layer的曲线参数
-        curve_list = layer_value.get("curve")
 
         #     将起始深度当做查询参数进行 label 查询
         query = {'StartDepth': {'$gte': l1_start}, "EndDepth": {'$lte': l1_end}}
@@ -73,6 +77,8 @@ def clean_data():
         # 定义一个字典，存储当前 layer 下所有 curve（Channel） 的起始数据
         label_start_end_item = {}
 
+        # 获取当前layer的曲线参数
+        curve_list = layer_value.get("curve")
         # 循环曲线参数
         for curve_item in curve_list:
             # 定义一个当前 layer 的的结束参数，用来获取 N(管节) 的起始值
