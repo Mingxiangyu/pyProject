@@ -54,7 +54,7 @@ df = pd.read_csv("G:\软件备份\Project\测井\项目所需\Case-3文件及说
 data_json = df.to_dict(orient='records')
 db = client["mydatabase"]
 # 标签表
-collection = db['PipeSpecificationsMaster']
+collection = db['pipe_specification']
 # collection.insert_many(data_json)
 
 

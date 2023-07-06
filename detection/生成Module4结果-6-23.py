@@ -29,7 +29,7 @@ db = client["mydatabase"]
 # 获取label（标签表）数据
 label_collection = db['label']
 # 获取管道规范数据
-PipeSpecifications_collection = db['PipeSpecificationsMaster']
+PipeSpecifications_collection = db['pipe_specification']
 # 获取公式计算结果
 calculate_collection = db['Calculate']
 
@@ -409,6 +409,26 @@ def rebuild_data(data):
 rebuild_data = rebuild_data(data)
 
 
+def findByODinAndWt(layerODin, layerWtLbFt):
+    # 查询管柱规范信息 todo 如果尺寸不对，直接返回异常，不进行计算，如果重量不对，则基于该尺寸找最接近的重量
+    PipeSpecifications_query = {'OD Ins': {'$eq': layerODin}, "Weight (lb/ft)": {'$eq': layerWtLbFt}}
+    pipeSpecifications_list = PipeSpecifications_collection.find(PipeSpecifications_query)
+    pipeSpecifications_list = list(pipeSpecifications_list)
+    # 如果通过 尺寸 和 重量 查不到，则通过 尺寸 查询
+    if not pipeSpecifications_list:
+        PipeSpecifications_query = {'OD Ins': {'$eq': layerODin}}
+        pipeSpecifications_list = PipeSpecifications_collection.find(PipeSpecifications_query)
+        pipeSpecifications_list = list(pipeSpecifications_list)
+        if not pipeSpecifications_list:
+            # 如果通过 尺寸 无法查询到数据，则抛出异常，输入数据有误
+            raise ValueError('Input size does not exist.')
+        # 获取 重量 最接近的数据当做当前管柱
+        pipeSpecifications_data = min(pipeSpecifications_list,
+                                      key=lambda x: abs(x.get("Weight (lb/ft)") - layerODin))
+    else:
+        pipeSpecifications_data = pipeSpecifications_list[0]
+    return pipeSpecifications_data
+
 def write_data(rebuild_data):
     #  每一根管柱写一个表
     for channel in rebuild_data:
@@ -417,15 +437,11 @@ def write_data(rebuild_data):
         layerWtLbFt = channel.get("LayerWtLbFt")
         start_end = channel.get("channel_data")
 
-        # 查询管柱规范信息 todo 如果尺寸不对，直接返回异常，不进行计算，如果重量不对，则基于该尺寸找最接近的重量
-        PipeSpecifications_query = {'OD Ins': {'$eq': layerODin}, "Weight (lb/ft)": {'$eq': layerWtLbFt}}
-        PipeSpecifications = PipeSpecifications_collection.find(PipeSpecifications_query)
-        PipeSpecifications = list(PipeSpecifications)
-        PipeSpecifications = PipeSpecifications[0]
+        pipeSpecifications_data = findByODinAndWt(layerODin, layerWtLbFt)
 
         # 管柱信息
-        thickness_ins = PipeSpecifications.get("Wall Thickness ins")
-        thickness_mm = PipeSpecifications.get("Wall Thickness mm")
+        thickness_ins = pipeSpecifications_data.get("Wall Thickness ins")
+        thickness_mm = pipeSpecifications_data.get("Wall Thickness mm")
 
         itemNO = 0
         # 准备csv的数据
@@ -545,6 +561,8 @@ def write_data(rebuild_data):
             writer.writerow(header)
             for i in range(len(row)):
                 writer.writerow([row_data for row_data in row[i]])
+
+
 
 
 write_data(rebuild_data)

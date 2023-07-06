@@ -54,6 +54,8 @@ lascurve_collection.create_index([("Depth", pymongo.ASCENDING)])
 label_collection = db['label']
 # 获取数据表
 collection = db['Calculate']
+# 获取管道规范数据
+PipeSpecifications_collection = db['pipe_specification']
 
 
 def flatten_value(dic):
@@ -181,6 +183,27 @@ def getCalculate(layer_type, label_label, a_jun, b_jun, c_jun, e_jun, n_jun, w, 
     # 使用参数和计算公式计算结果
     calculate = formula(w, v, curve_value, *params_list)
     return calculate
+
+
+def findByODinAndWt(layerODin, layerWtLbFt):
+    # 查询管柱规范信息 todo 如果尺寸不对，直接返回异常，不进行计算，如果重量不对，则基于该尺寸找最接近的重量
+    PipeSpecifications_query = {'OD Ins': {'$eq': layerODin}, "Weight (lb/ft)": {'$eq': layerWtLbFt}}
+    pipeSpecifications_list = PipeSpecifications_collection.find(PipeSpecifications_query)
+    pipeSpecifications_list = list(pipeSpecifications_list)
+    # 如果通过 尺寸 和 重量 查不到，则通过 尺寸 查询
+    if not pipeSpecifications_list:
+        PipeSpecifications_query = {'OD Ins': {'$eq': layerODin}}
+        pipeSpecifications_list = PipeSpecifications_collection.find(PipeSpecifications_query)
+        pipeSpecifications_list = list(pipeSpecifications_list)
+        if not pipeSpecifications_list:
+            # 如果通过 尺寸 无法查询到数据，则抛出异常，输入数据有误
+            raise ValueError('Input size does not exist.')
+        # 获取 重量 最接近的数据当做当前管柱
+        pipeSpecifications_data = min(pipeSpecifications_list,
+                                      key=lambda x: abs(x.get("Weight (lb/ft)") - layerODin))
+    else:
+        pipeSpecifications_data = pipeSpecifications_list[0]
+    return pipeSpecifications_data
 
 
 def clean_data():
@@ -601,9 +624,11 @@ def clean_data():
                     # 获取管柱信息
                     channel_w = curve_item.get("W")
                     channel_v = curve_item.get("V")
+                    # 管柱信息
                     LayerODin = curve_item.get("LayerODin")
                     LayerWtLbFt = curve_item.get("LayerWtLbFt")
-                    LayerNomThkin = curve_item.get("LayerNomThkin")
+                    pipeSpecifications_data = findByODinAndWt(LayerODin, LayerWtLbFt)
+                    LayerNomThkin = pipeSpecifications_data.get("Wall Thickness ins")
                     break
 
             channel_start_end = {

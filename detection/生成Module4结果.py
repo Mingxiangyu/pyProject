@@ -29,7 +29,7 @@ db = client["mydatabase"]
 # 获取label（标签表）数据
 label_collection = db['label']
 # 获取管道规范数据
-PipeSpecifications_collection = db['PipeSpecificationsMaster']
+PipeSpecifications_collection = db['pipe_specification']
 # 获取公式计算结果
 calculate_collection = db['Calculate']
 
