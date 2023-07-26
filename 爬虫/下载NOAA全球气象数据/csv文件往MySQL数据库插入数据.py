@@ -9,6 +9,10 @@
 import csv
 import os
 
+import pymysql
+
+db = pymysql.connect(host="211.157.132.19", port=17062, user="root", passwd="guoyao@123", db="bigdata_zhongbao",
+                     charset="utf8")
 cursor = db.cursor()
 
 
