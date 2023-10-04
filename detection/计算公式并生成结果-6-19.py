@@ -9,7 +9,7 @@ import csv
 import math
 
 import pymongo
-from pymongo import MongoClient
+from pymongo import MongoClient, UpdateOne
 
 # toDo 井构表数据，待放入库中，从库中查询
 l = {"type": 3, "start": 4.0667, "end": 897,
@@ -216,7 +216,7 @@ def clean_data():
         #     获取当前layer的起始深度
         l1_start = layer_value.get("start")
         l1_end = layer_value.get("end")
-        l1_type = layer_value.get("type")
+        l1_level = layer_value.get("level")
         # 获取当前layer的曲线参数
         curve_list = layer_value.get("curve")
 
@@ -627,12 +627,13 @@ def clean_data():
                     # 管柱信息
                     LayerODin = curve_item.get("LayerODin")
                     LayerWtLbFt = curve_item.get("LayerWtLbFt")
-                    pipeSpecifications_data = findByODinAndWt(LayerODin, LayerWtLbFt)
-                    LayerNomThkin = pipeSpecifications_data.get("Wall Thickness ins")
+                    if LayerODin and LayerWtLbFt:
+                        pipeSpecifications_data = findByODinAndWt(LayerODin, LayerWtLbFt)
+                        LayerNomThkin = pipeSpecifications_data.get("Wall Thickness ins")
                     break
 
             channel_start_end = {
-                "layer": l1_type,
+                "layer_level": l1_level,
                 "channel_name": channel,
                 "W": channel_w,
                 "V": channel_v,
@@ -647,7 +648,7 @@ def clean_data():
                     label_item_start_end = label_start_end_item.get(channel)
                     start_end_get = label_item_start_end.get(label)
                     channel_label = {
-                        "layer": l1_type,
+                        "layer_level": l1_level,
                         "LayerODin": LayerODin,
                         "LayerWtLbFt": LayerWtLbFt,
                         "LayerNomThkin": LayerNomThkin,
@@ -664,7 +665,7 @@ def clean_data():
         layer_data = {
             "layer_start": l1_start,
             "layer_end": l1_end,
-            "layer_type": l1_type,
+            "layer_level": l1_level,
             "layer_item": layer_item,
         }
         data.append(layer_data)
@@ -695,13 +696,20 @@ def curve_value_calculate(data, curve_depth, las_curve):
             continue
 
         # 记录当前深度属于哪个层级  方便后续查看
-        layer_type = layer_data.get("layer_type")
-        depth_item_dict["layer_type"] = layer_type
+        layer_level = layer_data.get("layer_level")
+        depth_item_dict["layer_level"] = layer_level
         # 将子字典放入字典中
         depth_channel_item_dict_list = []
 
         # 获取当前 layer 中所有 channel 标签集合
         channel_list = layer_data.get("layer_item")
+
+        # 获取当前 layer 的类型，3条曲线是3类 layer
+        layer_type = 0
+        for channel_item_data in channel_list:
+            if channel_item_data.get("channel_name"):
+                layer_type += 1
+
         # 循环所有 channel
         for channel_item_data in channel_list:
             # 获取当前 channel 中所有 label 标签集合
@@ -746,7 +754,7 @@ def curve_value_calculate(data, curve_depth, las_curve):
 
                     # 判断当前深度是否在该 label 下
                     if is_between(label_start, curve_depth, label_end):
-                        layer_type = label_item.get("layer")
+                        layer_level = label_item.get("layer_level")
                         label_type = label_item.get('label_type')
 
                         # 记录曲线值相关信息  方便后续查看
@@ -755,6 +763,7 @@ def curve_value_calculate(data, curve_depth, las_curve):
                         # 获取本次曲线名称
                         channel_name = label_item.get('channel_name')
                         curve_value = las_curve.get(channel_name)
+
                         calculate = getCalculate(layer_type=layer_type, label_label=label_type,
                                                  a_jun=a_jun, b_jun=b_jun, c_jun=c_jun, e_jun=e_jun, n_jun=n_jun,
                                                  w=channel_w, v=channel_v, curve_value=curve_value)
@@ -796,7 +805,14 @@ def write_data(data):
 
     print("开始写入数据")
     #  存储到数据库中
-    collection.insert_many(db_depth_list)
+    # 创建 UpdateOne 操作列表
+    update_operations = []
+    for doc in db_depth_list:
+        update_operations.append(
+            UpdateOne({"_id": doc["_id"]}, {"$set": doc}, upsert=True)
+        )
+    # 执行批量操作
+    collection.bulk_write(update_operations)
 
     # 将列表数据存储到 CSV 文件中
     with open('my_list.csv', 'w', newline='') as f:

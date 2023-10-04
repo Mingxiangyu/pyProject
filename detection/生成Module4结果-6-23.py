@@ -341,7 +341,9 @@ def clean_data():
                     channel_v = curve_item.get("V")
                     LayerODin = curve_item.get("LayerODin")
                     LayerWtLbFt = curve_item.get("LayerWtLbFt")
-                    LayerNomThkin = curve_item.get("LayerNomThkin")
+                    if LayerODin and LayerWtLbFt:
+                        pipeSpecifications_data = findByODinAndWt(LayerODin, LayerWtLbFt)
+                        LayerNomThkin = pipeSpecifications_data.get("Wall Thickness ins")
                     break
 
             channel_start_end = {
@@ -353,7 +355,6 @@ def clean_data():
                 "LayerWtLbFt": LayerWtLbFt,
                 "LayerNomThkin": LayerNomThkin,
             }
-            channel_label_list = []
             # 如果该 channel（曲线） 是空的，则直接对data复制为空
             if channel:
                 label_item_start_end = label_start_end_item.get(channel)
