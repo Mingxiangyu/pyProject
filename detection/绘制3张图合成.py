@@ -64,7 +64,7 @@ def build_parameter_two(raw_las_file_path):
         drop=True)  # reset_index so that the sparsity don't affect the indices reset_index（）使得稀疏性不影响索引
 
     # 修改无用数据或站位数据
-    new_data = new_data.replace(-999.25, 0)
+    new_data = new_data.replace(-999.25, np.nan)
 
     # original_data = original_data.to_numpy()
     return new_data
@@ -164,7 +164,7 @@ def build_parameter(raw_las_file_path):
     original_data = original_data[cols]
 
     # 修改无用数据或站位数据
-    original_data = original_data.replace(-999.25, 0)
+    original_data = original_data.replace(-999.25, np.nan)
 
     # original_data = original_data.to_numpy()
     return original_data
@@ -228,57 +228,67 @@ def one(axes, path):
 def two(axes, path):
     axes.invert_yaxis()
 
-    data = build_parameter_two(path)
-
-    # 可以试试在plot之前清空子图的图例:
-    axes.legend_ = None
-
-    # contains = data.columns.str.contains('ADEC')
-    color_map = ['r', 'g', 'b', 'y']
-    for i, col_name in enumerate(list(data.columns)):
-        if col_name == "Depth":
-            continue
-        color = color_map[(i % 4)]
-        data.plot(x=col_name,
-                  y='Depth',
-                  lw=0.5,  # lw=0.5 设置线的宽度为 0.5。
-                  color=color,  # matplotlib 的颜色映射colormap来获取不同的颜色
-                  label=None,  # label=col_name 设置曲线的标签为列名。
-                  ax=axes,  # ax=on_axis 指定要在 on_axis 对象（plt.Axes 对象）上绘制图形。
-                  use_index=True,  # 加上 use_index=True,这会强制使用原始的索引值(这里是 Depth)作为 y 值,而不是重新设置 y 轴范围。
-                  # legend=True,
-                  legend=False,
-                  )  # legend  控制是否显示图例，
-
     # grid 是否显示格子线条 网格
-    axes.grid(True)
+    axes.grid()
 
-    """
-    图例
-    """
-    lines = axes.get_lines()
-    labels = [line.get_label() for line in lines]
-    # 给labels去重，避免图例项重复
-    labels = list(set(labels))
+    # 隐藏坐标轴
+    # axes.axis('off')
 
-    def get_index(col):
-        if "[" not in col:
-            return 0
-        return int(col.split('[')[1].split(']')[0])
+    data = build_parameter_two(path)
+    nom_cols = data.filter(like='Nom_Thick').columns
 
-    # 排序，避免顺序换乱
-    labels = sorted(labels, key=get_index)
+    color_map = ['r', 'g', 'b', 'y']
+    for i, col in enumerate(nom_cols):
+        thick_col = col.replace('Nom_Thick', 'Thickness')
+        # 取上部分数据
+        # data[thick_col + "A"] = np.where(data[thick_col] > data[col], data[thick_col], np.nan)
+        # 取下部分数据
+        data[thick_col + "B"] = np.where(data[thick_col] <= data[col], data[thick_col], np.nan)
 
-    # 调用 legend() 方法,并指定参数 loc='upper center',bbox_to_anchor=(0.5, 1.15)。这可以把图例放在中心上方,并稍微抬高一些:
-    #  fontsize=12 设置图例的字体大小:    # 调整图例的边框:, borderaxespad=0.
-    # 去掉图例的边框线:edgecolor='none'  #ncol=3: 将图例分为3列显示
-    # 如果不需要边框, 可以设置:frameon=False
-    # axes.legend(lines, labels, loc='upper center',
-    #             bbox_to_anchor=(0.5, 1.05),
-    #             fontsize=3,
-    #             frameon=True, borderaxespad=1., ncol=2,
-    #             edgecolor='none'
-    #             )
+        # 绘制基准线
+        data.plot(x=col,
+                  y='Depth', lw=1,
+                  color="black",
+                  label=col,
+                  legend=False,
+                  ax=axes, use_index=True)
+        color = color_map[(i % 4)]
+        data.plot(x=thick_col + "B",
+                  y='Depth', lw=0.8,
+                  color=color,
+                  label=thick_col + "B",
+                  legend=False,
+                  ax=axes, use_index=True)
+
+        #  指定颜色
+        # 1 - Tubing为深绿色(单柱)
+        # 2 - TubingS为墨绿色(单柱)，为橘红色(双柱)
+        # 4 - Casing1为深蓝色(双柱)，5 - Casing2为浅蓝色(双柱)，6 - Casing3为深黄色(双柱)，7 - Casing4为土黄色(双柱)
+        # 8 - Casing5为紫色(双柱)，9 - Casing6为深灰色(双柱)
+        fill_color = None
+        if "Tubing" in col:
+            fill_color = "g"
+        elif "Liner" in col:
+            fill_color = "tab:orange"
+        elif "Casing" in col:
+            if "1" in col:
+                fill_color = "b"
+            elif "2" in col:
+                fill_color = "tab:blue"
+            elif "3" in col:
+                fill_color = "yellow"
+            elif "4" in col:
+                fill_color = "darkkhaki"
+            elif "5" in col:
+                fill_color = "purple"
+            elif "6" in col:
+                fill_color = "gray"
+        # data["Depth"]: y轴的数据, 填充的竖向基准。    # data[thick_col + "A"]: x轴的下限数据, 填充区域的左边界。
+        # data[col]: x轴的上限数据, 填充区域的右边界。
+        # alpha: 填充颜色的透明度, 0    完全透明, 1    完全不透明。
+        # color: 填充的颜色。
+        # plt.fill_betweenx(data["Depth"], data[col], data[thick_col + "A"], alpha=0.5, color=cmap(0.2))
+        axes.fill_betweenx(data["Depth"], data[col], data[thick_col + "B"], alpha=1, color=fill_color)
 
 
 def three(axes, path):
@@ -326,9 +336,11 @@ plt.rcParams['font.sans-serif'] = ['Microsoft YaHei']
 # 设置了解决matplotlib在显示中文时负号'-'显示为方块的问题。因为matplotlib默认会使用unicode编码,而很多中文字体不支持负号的unicode编码。这个设置将其关闭,就可以正常显示中文负号了。
 plt.rcParams['axes.unicode_minus'] = False
 
+# toDo 基于设置指定比例
 # figsize 指定整个图片的大小表示图形 宽8 长5。figsize是预先定义的一个变量。
-figsize = (5, 50)
+# figsize = (5, 50)
 # figsize = (16, 9)
+figsize=None
 
 # sharey=True 表示这些子图共享y轴。这样不同子图的y轴范围保持一致。
 # constrained_layout 会自动调整子图和装饰，使其尽可能地适合图中。
