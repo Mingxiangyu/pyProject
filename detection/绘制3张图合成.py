@@ -316,6 +316,7 @@ def three(axes, path):
     bar_width = 0.35
     rects1 = axes.bar(index, result, bar_width, color='gray',
                       bottom=bottoms,
+
                       label='Men')
 
     # 隐藏坐标轴
