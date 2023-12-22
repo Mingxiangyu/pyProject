@@ -9,7 +9,7 @@ import os
 import re
 
 # 改这个目录！！！
-top_dir = "E:\\java_comments_trim\\"
+top_dir = r"C:\Users\zhouhuilin\Desktop\daoda-zhongbao-meta"
 # 状态
 S_INIT = 0
 S_SLASH = 1 # 斜杠
@@ -39,7 +39,7 @@ def trim_file(path):
         return
     bak_file = path + ".bak"
     os.rename(path, bak_file)
-    fp_src = open(bak_file)
+    fp_src = open(bak_file,encoding='utf-8')
     fp_dst = open(path, 'w')
     # 初始状态定义为代码
     state = S_INIT
