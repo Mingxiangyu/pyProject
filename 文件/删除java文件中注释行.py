@@ -9,7 +9,7 @@ import os
 import re
 
 # 改这个目录！！！
-top_dir = r"C:\Users\zhouhuilin\Desktop\daoda-zhongbao-meta"
+top_dir = r"C:\Users\zhouhuilin\Desktop\test\daoda-zhongbao-meta"
 # 状态
 S_INIT = 0
 S_SLASH = 1 # 斜杠
@@ -32,15 +32,15 @@ def trim_dir(path):
 def trim_file(path):
     print("文件：" + path)
     # 使用 re.match() 函数检查路径是否匹配正则表达式模式
-    if re.match(r".*java", path):
+    if re.match(r".*xml", path):
         print(" 处理")
     else:
         print(" 忽略")
         return
     bak_file = path + ".bak"
     os.rename(path, bak_file)
-    fp_src = open(bak_file,encoding='utf-8')
-    fp_dst = open(path, 'w')
+    fp_src = open(bak_file,encoding='utf-8', errors='replace')
+    fp_dst = open(path, 'w',encoding='utf-8')
     # 初始状态定义为代码
     state = S_INIT
     for line in fp_src.readlines():
