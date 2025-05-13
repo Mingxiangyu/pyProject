@@ -5,6 +5,8 @@
 # @时间：2024/12/2 19:22
 # @作者：xming
 # -------------------------------
+import traceback
+
 from pymilvus import (
   connections,
   Collection,
@@ -13,7 +15,6 @@ from pymilvus import (
   DataType,
   MilvusException
 )
-import traceback
 
 
 def test_milvus_connection():
@@ -34,7 +35,7 @@ def test_milvus_connection():
 
     # 测试特定集合
     # collection_name = 'Vector_index_da0c79af_1580_4f41_af5d_7b923c4e8195_Node'
-    collection_name = 'Vector_index_fa93b9ad_9ee3_4396_aa52_17848f3785c6_Node'
+    collection_name = 'Vector_index_08790e29_a40b_46e2_be1b_24cb80bde58f_Node'
 
     try:
       # 尝试获取集合

@@ -1,0 +1,9 @@
+services:
+  funasr:
+    image: funasr:1.0
+    container_name: funasr
+    restart: always
+    ports:
+      - 5102:5102
+    volumes:
+      - ./model:/funAsr/model
